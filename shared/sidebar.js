@@ -1,11 +1,10 @@
 import gql from "graphql-tag";
 import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
-import Link from "next/link";
+import RouteLink from "next/link";
+import PageList from "./pageList";
 import {
   useDisclosure,
   Box,
-  List,
-  ListItem,
   Input,
   Button,
   Modal,
@@ -15,6 +14,8 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Link,
+  Icon,
 } from "@chakra-ui/core";
 
 const query = gql`
@@ -35,9 +36,18 @@ const subscription = gql`
   }
 `;
 
-const mutation = gql`
+const addMutation = gql`
   mutation CreatePage($title: String!) {
     createPage(title: $title) {
+      _id
+      title
+    }
+  }
+`;
+
+const deleteMutation = gql`
+  mutation DeletePage($id: String!) {
+    deletePage(id: $id) {
       _id
       title
     }
@@ -48,16 +58,7 @@ export default function Sidebar(props) {
   const [title, setTitle] = React.useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, loading, error } = useQuery(query);
-  const { data: subscriptionData } = useSubscription(subscription, {
-    onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-      if (data?.pageAdded) {
-        const d = client.readQuery({ query });
-        d.pages.push(data.pageAdded);
-        client.writeQuery({ query, data: d });
-      }
-    },
-  });
-  const [createPage, { data: newPageData }] = useMutation(mutation);
+  const [createPage] = useMutation(addMutation);
 
   const pages = data?.pages || [];
 
@@ -77,19 +78,10 @@ export default function Sidebar(props) {
       backgroundColor="green.300"
       overflow="auto"
       p="4"
+      maxW={250}
     >
       <Button onClick={onOpen}>Create Page</Button>
-      <List>
-        {pages.map((page) => {
-          return (
-            <ListItem key={page._key}>
-              <Link href={"[_key]"} as={page.title}>
-                <a>{page.title}</a>
-              </Link>
-            </ListItem>
-          );
-        })}
-      </List>
+      <PageList />
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />

@@ -26,10 +26,12 @@ const typeDefs = gql`
 
   type Mutation {
     createPage(title: String!): Page
+    deletePage(id: String!): Page
   }
 
   type Subscription {
     pageAdded: Page
+    pageDeleted: Page
   }
 `;
 
@@ -61,10 +63,25 @@ const resolvers = {
         console.log(e);
       }
     },
+    deletePage: async (parent, args, context, info) => {
+      const collection = db.collection("Pages");
+      console.log(args);
+      try {
+        const document = await collection.document(args.id);
+        collection.remove(document._key);
+        pubSub.publish("pageDeleted", { pageDeleted: document });
+        return document;
+      } catch (e) {
+        console.log(e);
+      }
+    },
   },
   Subscription: {
     pageAdded: {
       subscribe: () => pubSub.asyncIterator(["pageAdded"]),
+    },
+    pageDeleted: {
+      subscribe: () => pubSub.asyncIterator(["pageDeleted"]),
     },
   },
 };
