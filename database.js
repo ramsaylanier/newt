@@ -1,6 +1,6 @@
-import { Database, aql } from "arangojs";
+const { Database, aql } = require("arangojs");
 const db = new Database({ url: "http://localhost:8529" });
 db.useDatabase("nkg");
 db.useBasicAuth("root", "");
 
-export default db;
+module.exports = db;

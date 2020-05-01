@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start"
+    "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
@@ -18,14 +18,17 @@
     "apollo-link-error": "^1.1.13",
     "apollo-link-http": "^1.5.17",
     "apollo-server": "^2.12.0",
-    "apollo-server-micro": "^2.12.0",
+    "apollo-server-express": "^2.12.0",
     "arangojs": "5",
+    "cross-env": "^7.0.2",
     "emotion-theming": "^10.0.27",
     "graphql": "^15.0.0",
+    "graphql-subscriptions": "^1.1.0",
     "graphql-tag": "^2.10.3",
     "next": "9.3.5",
     "node-fetch": "^2.6.0",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "subscriptions-transport-ws": "^0.9.16"
   }
 }
