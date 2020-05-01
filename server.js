@@ -15,6 +15,7 @@ const pubSub = new PubSub();
 
 const typeDefs = gql`
   type Page {
+    _id: ID!
     _key: String
     title: String
   }
@@ -28,7 +29,7 @@ const typeDefs = gql`
   }
 
   type Subscription {
-    pageAdded(title: String!): Page
+    pageAdded: Page
   }
 `;
 
@@ -53,9 +54,9 @@ const resolvers = {
 
       try {
         const newPage = await collection.save({ title: args.title });
-        console.log(newPage);
-        pubSub.publish("pageAdded", { pageAdded: { newPage } });
-        return collection.document(newPage);
+        const document = collection.document(newPage);
+        pubSub.publish("pageAdded", { pageAdded: document });
+        return document;
       } catch (e) {
         console.log(e);
       }
@@ -63,23 +64,22 @@ const resolvers = {
   },
   Subscription: {
     pageAdded: {
-      subscribe: () => pubSub.asyncIterator("pageAdded"),
+      subscribe: () => pubSub.asyncIterator(["pageAdded"]),
     },
   },
 };
 
 app.prepare().then(() => {
   const server = express();
-
   const apolloServer = new ApolloServer({ typeDefs, resolvers });
   apolloServer.applyMiddleware({ app: server });
+
+  const httpServer = createServer(server);
+  apolloServer.installSubscriptionHandlers(httpServer);
 
   server.all("*", (req, res) => {
     return handle(req, res);
   });
-
-  const httpServer = createServer(server);
-  apolloServer.installSubscriptionHandlers(httpServer);
   httpServer.listen(PORT, () => {
     console.log(
       `🚀 Server ready at http://localhost:${PORT}${apolloServer.graphqlPath}`

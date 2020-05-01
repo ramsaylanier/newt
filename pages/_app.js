@@ -2,8 +2,7 @@ import React from "react";
 import NextApp from "next/app";
 import { ThemeProvider, CSSReset, ColorModeProvider } from "@chakra-ui/core";
 import { ApolloProvider } from "@apollo/react-hooks";
-import client from "../graphql/graphqlClient";
-
+import client from "../graphql/client";
 import theme from "../theme";
 
 class App extends NextApp {

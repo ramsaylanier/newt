@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
 import Link from "next/link";
 import {
   useDisclosure,
@@ -18,9 +18,18 @@ import {
 } from "@chakra-ui/core";
 
 const query = gql`
-  query Page {
+  query AllPages {
     pages {
-      _key
+      _id
+      title
+    }
+  }
+`;
+
+const subscription = gql`
+  subscription onPageAdded {
+    pageAdded {
+      _id
       title
     }
   }
@@ -29,7 +38,7 @@ const query = gql`
 const mutation = gql`
   mutation CreatePage($title: String!) {
     createPage(title: $title) {
-      _key
+      _id
       title
     }
   }
@@ -39,6 +48,15 @@ export default function Sidebar(props) {
   const [title, setTitle] = React.useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data, loading, error } = useQuery(query);
+  const { data: subscriptionData } = useSubscription(subscription, {
+    onSubscriptionData: ({ client, subscriptionData: { data } }) => {
+      if (data?.pageAdded) {
+        const d = client.readQuery({ query });
+        d.pages.push(data.pageAdded);
+        client.writeQuery({ query, data: d });
+      }
+    },
+  });
   const [createPage, { data: newPageData }] = useMutation(mutation);
 
   const pages = data?.pages || [];
