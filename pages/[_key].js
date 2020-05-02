@@ -14,22 +14,38 @@ const query = gql`
       _id
       _key
       title
+      blocks {
+        id
+        content
+      }
+      edges {
+        _key
+        from {
+          _id
+          _key
+          title
+        }
+        to {
+          _id
+          _key
+          title
+        }
+      }
     }
   }
 `;
 
 const Page = () => {
-  const [blocks, setBlocks] = React.useState(new Map());
   const router = useRouter();
   const { _key } = router.query;
   const skip = !_key;
   const { data, loading, error } = useQuery(query, {
-    variables: { id: _key },
+    variables: { id: `Pages/${_key}` },
     skip,
   });
 
   const page = data?.page || null;
-  const blockies = [...blocks.keys()];
+  const blocks = page?.blocks || [];
 
   return (
     <div className="container">
@@ -43,12 +59,11 @@ const Page = () => {
           <Box p={4}>
             <PageTitle title={page.title} />
 
-            {blockies.map((key) => {
-              const block = blocks.get(key);
-              return <ContentBlock key={key} block={block} />;
+            {blocks.map((block) => {
+              return <ContentBlock key={block.id} block={block} />;
             })}
 
-            <ContentBuilder blocks={blocks} setBlocks={setBlocks} />
+            <ContentBuilder />
           </Box>
         )}
       </Layout>

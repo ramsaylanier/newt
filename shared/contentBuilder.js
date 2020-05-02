@@ -1,14 +1,29 @@
 import { ButtonGroup, Modal, IconButton, useDisclosure } from "@chakra-ui/core";
 import PageFinder from "./pageFinder";
-import { uuid } from "uuidv4";
+import { useRouter } from "next/router";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/react-hooks";
 
-export default function ContentBuilder({ blocks, setBlocks }) {
+const mutation = gql`
+  mutation CreatePageBlock($id: String!) {
+    createPageBlock(id: $id) {
+      _id
+      blocks {
+        id
+        content
+      }
+    }
+  }
+`;
+
+export default function ContentBuilder() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [createPageBlock] = useMutation(mutation);
+  const router = useRouter();
+  const { _key } = router.query;
+
   const handleAdd = () => {
-    const id = uuid();
-    const newBlocks = new Map(blocks);
-    newBlocks.set(id, { content: "" });
-    setBlocks(newBlocks);
+    createPageBlock({ variables: { id: `Pages/${_key}` } });
   };
 
   return (

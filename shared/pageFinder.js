@@ -68,7 +68,6 @@ export default function PageFinder({ isOpen, onClose }) {
 
   const [createPageEdges] = useMutation(mutation);
 
-  console.log(data);
   const pages = data?.pages?.filter((page) => page._key !== _key) || [];
 
   const handleClick = () => {
@@ -81,7 +80,6 @@ export default function PageFinder({ isOpen, onClose }) {
   };
 
   const handleChange = (selection) => {
-    console.log(selection);
     setSelection(selection);
   };
 

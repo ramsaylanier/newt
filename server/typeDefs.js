@@ -9,7 +9,14 @@ const typeDefs = gql`
     _id: ID!
     _key: String
     title: String
+    blocks: [Block]
     edges: [PageEdge]
+  }
+
+  type Block {
+    id: ID!
+    content: String!
+    pages: [Page]
   }
 
   type PageEdge {
@@ -29,6 +36,8 @@ const typeDefs = gql`
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
     createPageEdges(source: String, targets: [String]): [PageEdge]
+    createPageBlock(id: String!): Page
+    deletePageBlock(pageId: String!, blockId: String!): Page
   }
 
   type Subscription {

@@ -2,11 +2,40 @@ const { PubSub } = require("graphql-subscriptions");
 const pubSub = new PubSub();
 const db = require("./database");
 const { aql } = require("arangojs");
+const { getPage } = require("./connectors");
+const { uuid } = require("uuidv4");
 
 const resolvers = {
   Page: {
     edges: async (parent, args) => {
-      console.log(parent);
+      const collection = db.edgeCollection("PageEdges");
+      try {
+        const outEdges = await collection.outEdges(parent._id);
+        const inEdges = await collection.inEdges(parent._id);
+        const edges = [...outEdges, ...inEdges];
+        return edges;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+  },
+  PageEdge: {
+    from: async (parent) => {
+      const collection = db.collection("Page");
+      try {
+        const page = await getPage(parent._from);
+        return page;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    to: async (parent) => {
+      const collection = db.collection("Page");
+      try {
+        return getPage(parent._to);
+      } catch (e) {
+        console.log(e);
+      }
     },
   },
   Query: {
@@ -29,17 +58,7 @@ const resolvers = {
       }
     },
     page: async (parent, args, context, info) => {
-      const collection = db.collection("Pages");
-      try {
-        const query = await db.query(aql`
-          FOR p IN ${collection}
-          FILTER p._key == ${args.id}
-          RETURN p
-        `);
-        return query.next();
-      } catch (e) {
-        console.log(e);
-      }
+      return getPage(args.id);
     },
   },
   Mutation: {
@@ -103,6 +122,38 @@ const resolvers = {
         return Promise.all(edges).then((values) => {
           return values;
         });
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    createPageBlock: async (parent, args) => {
+      const collection = db.collection("Pages");
+      try {
+        const page = await getPage(args.id);
+        const blocks = page.blocks || [];
+        const newBlock = { id: uuid(), content: "" };
+        blocks.push(newBlock);
+        const update = await collection.update(
+          page,
+          { blocks },
+          { returnNew: true }
+        );
+        return update.new;
+      } catch (e) {
+        console.log(e);
+      }
+    },
+    deletePageBlock: async (parent, args) => {
+      const collection = db.collection("Pages");
+      try {
+        const page = await getPage(args.pageId);
+        const blocks = page.blocks.filter((b) => b.id !== args.blockId);
+        const update = await collection.update(
+          page,
+          { blocks },
+          { returnNew: true }
+        );
+        return update.new;
       } catch (e) {
         console.log(e);
       }
