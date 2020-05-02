@@ -21,6 +21,7 @@ const query = gql`
   query AllPages {
     pages {
       _id
+      _key
       title
     }
   }
@@ -30,6 +31,7 @@ const addedSubscription = gql`
   subscription onPageAdded {
     pageAdded {
       _id
+      _key
       title
     }
   }
@@ -39,6 +41,7 @@ const deletedSubscription = gql`
   subscription onPageDeleted {
     pageDeleted {
       _id
+      _key
       title
     }
   }
@@ -48,6 +51,7 @@ const deleteMutation = gql`
   mutation DeletePage($id: String!) {
     deletePage(id: $id) {
       _id
+      _key
       title
     }
   }
@@ -101,7 +105,7 @@ export default function Sidebar(props) {
             whiteSpace="nowrap"
             maxWidth={200}
           >
-            <RouteLink href={"[_key]"} as={page.title}>
+            <RouteLink href={"[_key]"} as={page._key}>
               <Link overflow="hidden" textOverflow="ellipsis" flex="1">
                 {page.title}
               </Link>

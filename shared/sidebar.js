@@ -80,7 +80,9 @@ export default function Sidebar(props) {
       p="4"
       maxW={250}
     >
-      <Button onClick={onOpen}>Create Page</Button>
+      <Button onClick={onOpen} mb="2">
+        Create Page
+      </Button>
       <PageList />
 
       <Modal isOpen={isOpen} onClose={onClose}>
