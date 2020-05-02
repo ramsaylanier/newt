@@ -22,6 +22,7 @@
     "apollo-server-express": "^2.12.0",
     "arangojs": "5",
     "cross-env": "^7.0.2",
+    "draft-js": "^0.11.5",
     "emotion-theming": "^10.0.27",
     "graphql": "^15.0.0",
     "graphql-subscriptions": "^1.1.0",
@@ -30,6 +31,8 @@
     "node-fetch": "^2.6.0",
     "react": "16.13.1",
     "react-dom": "16.13.1",
+    "react-draft-wysiwyg": "^1.14.5",
+    "reset.css": "^2.0.2",
     "subscriptions-transport-ws": "^0.9.16",
     "uuidv4": "^6.0.8"
   }

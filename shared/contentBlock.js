@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import {
   Box,
   ButtonGroup,
@@ -7,6 +8,8 @@ import {
   InputGroup,
   InputRightElement,
 } from "@chakra-ui/core";
+import { Editor, EditorState, RichUtils } from "draft-js";
+import ContentBlockStyleControls from "./contentBlockStyleControls";
 
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
@@ -24,6 +27,11 @@ const mutation = gql`
 `;
 
 export default function ContentBlock({ block }) {
+  const [editorState, setEditorState] = React.useState(
+    EditorState.createEmpty()
+  );
+
+  const editorRef = React.useRef(null);
   const router = useRouter();
   const { _key } = router.query;
   const [value, setValue] = React.useState(block.title);
@@ -35,14 +43,80 @@ export default function ContentBlock({ block }) {
     });
   };
 
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  const handleToggle = (blockType) => {
+    setEditorState(RichUtils.toggleBlockType(editorState, blockType));
+  };
+
   return (
-    <Box display="flex">
-      <InputGroup width="100%">
-        <Textarea value={value} backgroundColor="gray.100" mb="1" pr="2rem" />
-        <InputRightElement width="2rem">
-          <IconButton icon="small-close" onClick={handleDelete} />
-        </InputRightElement>
-      </InputGroup>
+    <Box p="1" bg="gray.100" mb="4">
+      <Box display="flex" justifyContent="space-between" mb="4">
+        <ContentBlockStyleControls
+          editorState={editorState}
+          onToggle={handleToggle}
+        />
+        <IconButton icon="small-close" onClick={handleDelete} />
+      </Box>
+
+      <Box p="2">
+        <Editor
+          ref={editorRef}
+          editorState={editorState}
+          onChange={setEditorState}
+          placeholder="Enter some content..."
+          spellCheck={true}
+        />
+      </Box>
+
+      <style global jsx>{`
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+          text-rendering: optimizeLegibility;
+          line-height: 1;
+          margin-top: 0;
+        }
+
+        h1 {
+          font-size: 4em;
+          margin-bottom: 2.42424rem;
+        }
+
+        h2 {
+          font-size: 3.33333em;
+          margin-bottom: 2.0202rem;
+        }
+
+        h3 {
+          font-size: 2.66667em;
+          margin-bottom: 1.61616rem;
+        }
+
+        h4 {
+          font-size: 2em;
+          margin-bottom: 1.21212rem;
+        }
+
+        h5 {
+          font-size: 1.33333em;
+          margin-bottom: 0.80808rem;
+        }
+
+        p {
+          margin: auto auto 1.5rem;
+        }
+
+        p + p {
+          text-indent: 1.5rem;
+          margin-top: -1.5rem;
+        }
+      `}</style>
     </Box>
   );
 }

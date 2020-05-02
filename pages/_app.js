@@ -4,6 +4,8 @@ import { ThemeProvider, CSSReset, ColorModeProvider } from "@chakra-ui/core";
 import { ApolloProvider } from "@apollo/react-hooks";
 import client from "../graphql/client";
 import theme from "../theme";
+import "../normalize.css";
+import "draft-js/dist/Draft.css";
 
 class App extends NextApp {
   render() {
@@ -11,7 +13,6 @@ class App extends NextApp {
     return (
       <ApolloProvider client={client}>
         <ThemeProvider theme={theme}>
-          <CSSReset />
           <ColorModeProvider>
             <Component />
           </ColorModeProvider>

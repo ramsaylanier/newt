@@ -52,6 +52,7 @@ const Page = () => {
       <Head>
         <title>Create</title>
         <link rel="icon" href="/favicon.ico" />
+        <meta charset="utf-8" />
       </Head>
 
       <Layout>

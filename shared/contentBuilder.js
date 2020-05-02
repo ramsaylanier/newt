@@ -18,9 +18,21 @@ const mutation = gql`
 
 export default function ContentBuilder() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [createPageBlock] = useMutation(mutation);
+  const [createPageBlock, { data }] = useMutation(mutation);
   const router = useRouter();
   const { _key } = router.query;
+
+  // focus new node
+  React.useEffect(() => {
+    if (data) {
+      const blocks = data?.createPageBlock?.blocks;
+      const newBlock = blocks[blocks.length - 1];
+      const newBlockNode = document.getElementById(`block-${newBlock.id}`);
+      if (newBlockNode) {
+        newBlockNode.focus();
+      }
+    }
+  }, [data]);
 
   const handleAdd = () => {
     createPageBlock({ variables: { id: `Pages/${_key}` } });
