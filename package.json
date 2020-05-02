@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
+    "dev": "nodemon --ignore pages/ --ignore shared/ --ignore graphql/ --ignore ./theme.js server.js",
     "build": "next build",
     "start": "cross-env NODE_ENV=production node server.js"
   },
