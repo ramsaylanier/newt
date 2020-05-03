@@ -4,7 +4,7 @@ import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks'
 import RouteLink from 'next/link'
 import { List, ListItem, Button, Link, Icon } from '@chakra-ui/core'
 
-const query = gql`
+export const query = gql`
   query AllPages {
     pages {
       _id
@@ -44,14 +44,17 @@ const deleteMutation = gql`
   }
 `
 
-export default function Sidebar() {
-  const { data } = useQuery(query)
+export default function PageList() {
+  const filters = {}
+  const { data } = useQuery(query, { variables: { filters } })
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
+      console.log(data)
       if (data?.pageAdded) {
         const d = client.readQuery({ query })
         d.pages.push(data.pageAdded)
+        console.log(d)
         client.writeQuery({ query, data: d })
       }
     },

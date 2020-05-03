@@ -2,9 +2,6 @@ import React from 'react'
 import { Box, Button, IconButton, useDisclosure } from '@chakra-ui/core'
 import PageFinder from './pageFinder'
 import { addPageLink } from '../utils/draftUtil'
-import gql from 'graphql-tag'
-import { useMutation } from '@apollo/react-hooks'
-import { useRouter } from 'next/router'
 
 const BLOCK_TYPES = [
   { label: 'H1', style: 'header-one' },
@@ -27,27 +24,6 @@ const INLINE_STYLES = [
   { label: 'Monospace', style: 'CODE' },
 ]
 
-const mutation = gql`
-  mutation CreatePageEdge(
-    $source: String!
-    $target: String!
-    $blockKey: String!
-  ) {
-    createPageEdge(source: $source, target: $target, blockKey: $blockKey) {
-      _id
-      _key
-      from {
-        _id
-        title
-      }
-      to {
-        _id
-        title
-      }
-    }
-  }
-`
-
 const StyleButton = (props) => {
   const onToggle = () => {
     props.onToggle(props.style)
@@ -63,11 +39,8 @@ const StyleButton = (props) => {
 }
 
 export default function ContentBlockControls(props) {
-  const router = useRouter()
-  const { _key } = router.query
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { editorState, onToggle, onToggleStyles } = props
-  const [createPageEdge] = useMutation(mutation)
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
   const blockType = contentState
@@ -77,11 +50,7 @@ export default function ContentBlockControls(props) {
 
   const handleAddPageLink = (page) => {
     const { updatedEditorState, entityKey } = addPageLink(editorState, page)
-    const source = _key
-    const target = page._key
     const selection = updatedEditorState.getSelection()
-    const blockKey = selection.focusKey
-    createPageEdge({ variables: { source, target, blockKey } })
     props.setEditorState(updatedEditorState, selection, entityKey)
   }
 

@@ -45,7 +45,7 @@ const Page = () => {
   })
 
   const page = data?.page || null
-  const toLinks = page?.edges?.filter((edge) => edge.to._key === _key) || []
+  const toLinks = page?.edges?.filter((edge) => edge?.to?._key === _key) || []
 
   return (
     <div className="container">

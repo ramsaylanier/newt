@@ -1,5 +1,4 @@
 import React from 'react'
-import gql from 'graphql-tag'
 import { useRouter } from 'next/router'
 import { useQuery } from '@apollo/react-hooks'
 import {
@@ -13,27 +12,8 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/core'
-
-const query = gql`
-  query PageQuery {
-    pages {
-      _id
-      _key
-      title
-      edges {
-        _id
-        to {
-          _id
-          title
-        }
-        from {
-          _id
-          title
-        }
-      }
-    }
-  }
-`
+import CreatePageAction from './createPageAction'
+import { query } from './pageList'
 
 export default function PageFinder({ isOpen, onClose, onSave }) {
   const router = useRouter()
@@ -61,6 +41,8 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
         <ModalCloseButton />
         <ModalBody>
           <Box display="flex" flexDir="column" alignItems="flex-start" mb="4">
+            <CreatePageAction />
+
             {pages.map((page) => {
               return (
                 <Button
