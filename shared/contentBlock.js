@@ -1,25 +1,18 @@
 import React from 'react'
+import gql from 'graphql-tag'
 import { useRouter } from 'next/router'
-
-import { Box, IconButton } from '@chakra-ui/core'
-import { Editor, EditorState, RichUtils, CompositeDecorator } from 'draft-js'
+import { useMutation } from '@apollo/react-hooks'
+import { Box, Button } from '@chakra-ui/core'
+import {
+  Editor,
+  EditorState,
+  RichUtils,
+  CompositeDecorator,
+  convertToRaw,
+  convertFromRaw,
+} from 'draft-js'
 import ContentBlockStyleControls from './contentBlockStyleControls'
 import ContentBlockPageLink from './contentBlockPageLink'
-
-import gql from 'graphql-tag'
-import { useMutation } from '@apollo/react-hooks'
-
-const mutation = gql`
-  mutation DeletePageBlock($pageId: String!, $blockId: String!) {
-    deletePageBlock(pageId: $pageId, blockId: $blockId) {
-      _id
-      blocks {
-        id
-        content
-      }
-    }
-  }
-`
 
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -39,21 +32,32 @@ const decorator = new CompositeDecorator([
   },
 ])
 
-export default function ContentBlock({ block }) {
+const mutation = gql`
+  mutation UpdatePageContent($id: String!, $content: GenericScalar) {
+    updatePageContent(id: $id, content: $content) {
+      _id
+      _key
+      title
+    }
+  }
+`
+
+export default function ContentBlock({ page }) {
+  const router = useRouter()
+  const { _key } = router.query
+  const [updatePageContent] = useMutation(mutation)
   const [editorState, setEditorState] = React.useState(
     EditorState.createEmpty(decorator)
   )
 
-  const editorRef = React.useRef(null)
-  const router = useRouter()
-  const { _key } = router.query
-  const [deletePageBlock] = useMutation(mutation)
+  React.useEffect(() => {
+    if (page?.content) {
+      const content = convertFromRaw(page.content)
+      setEditorState(EditorState.createWithContent(content, decorator))
+    }
+  }, [page])
 
-  const handleDelete = () => {
-    deletePageBlock({
-      variables: { pageId: `Pages/${_key}`, blockId: block.id },
-    })
-  }
+  const editorRef = React.useRef(null)
 
   const handleChange = (state) => {
     setEditorState(state)
@@ -67,19 +71,23 @@ export default function ContentBlock({ block }) {
     setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle))
   }
 
+  const handleClick = () => {
+    const content = convertToRaw(editorState.getCurrentContent())
+    updatePageContent({ variables: { id: _key, content } })
+  }
+
   return (
-    <Box p="1" bg="gray.100" mb="4">
-      <Box display="flex" justifyContent="space-between" mb="4">
+    <Box>
+      <Box bg="gray.100">
         <ContentBlockStyleControls
           editorState={editorState}
           setEditorState={setEditorState}
           onToggle={handleToggle}
           onToggleStyles={handleToggleStyles}
         />
-        <IconButton icon="small-close" onClick={handleDelete} />
       </Box>
 
-      <Box p="2">
+      <Box px="4" py="8" bg="gray.100">
         <Editor
           ref={editorRef}
           editorState={editorState}
@@ -88,6 +96,9 @@ export default function ContentBlock({ block }) {
           spellCheck={true}
         />
       </Box>
+      <Button mt="4" variantColor="green" size="lg" onClick={handleClick}>
+        Save
+      </Button>
 
       <style global jsx>{`
         h1,

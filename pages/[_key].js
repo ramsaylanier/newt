@@ -6,7 +6,6 @@ import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
 import { Box } from '@chakra-ui/core'
 import PageTitle from '../shared/pageTitle'
-import ContentBuilder from '../shared/contentBuilder'
 import ContentBlock from '../shared/contentBlock'
 
 const query = gql`
@@ -15,10 +14,7 @@ const query = gql`
       _id
       _key
       title
-      blocks {
-        id
-        content
-      }
+      content
       edges {
         _key
         from {
@@ -46,7 +42,8 @@ const Page = () => {
   })
 
   const page = data?.page || null
-  const blocks = page?.blocks || []
+
+  console.log(page)
 
   return (
     <div className="container">
@@ -59,12 +56,7 @@ const Page = () => {
         {page && (
           <Box p={4}>
             <PageTitle title={page.title} />
-
-            {blocks.map((block) => {
-              return <ContentBlock key={block.id} block={block} />
-            })}
-
-            <ContentBuilder />
+            <ContentBlock page={page} />
           </Box>
         )}
       </Layout>

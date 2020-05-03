@@ -1,7 +1,11 @@
 import React from 'react'
 import { Box, Button, IconButton, useDisclosure } from '@chakra-ui/core'
 import PageFinder from './pageFinder'
-import { Modifier, EditorState, SelectionState } from 'draft-js'
+import { addPageLink } from '../utils/draftUtil'
+import gql from 'graphql-tag'
+import { useMutation } from '@apollo/react-hooks'
+import { useRouter } from 'next/router'
+import { convertToRaw } from 'draft-js'
 
 const BLOCK_TYPES = [
   { label: 'H1', style: 'header-one' },
@@ -24,6 +28,27 @@ const INLINE_STYLES = [
   { label: 'Monospace', style: 'CODE' },
 ]
 
+const mutation = gql`
+  mutation CreatePageEdges(
+    $source: String!
+    $targets: [String]!
+    $blockKey: String!
+  ) {
+    createPageEdges(source: $source, targets: $targets, blockKey: $blockKey) {
+      _id
+      _key
+      from {
+        _id
+        title
+      }
+      to {
+        _id
+        title
+      }
+    }
+  }
+`
+
 const StyleButton = (props) => {
   const onToggle = () => {
     props.onToggle(props.style)
@@ -39,8 +64,11 @@ const StyleButton = (props) => {
 }
 
 export default function BlockStyleControls(props) {
+  const router = useRouter()
+  const { _key } = router.query
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { editorState, onToggle, onToggleStyles } = props
+  const [createPageEdges] = useMutation(mutation)
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
   const blockType = contentState
@@ -48,71 +76,17 @@ export default function BlockStyleControls(props) {
     .getType()
   const currentStyle = editorState.getCurrentInlineStyle()
 
-  const handleSave = (page) => {
-    let entityKey
-    let updatedSelectionState
-    let updatedContentState
+  const handleAddPageLink = (page) => {
+    const { updatedEditorState, entityKey } = addPageLink(editorState, page)
+    const source = _key
+    const targets = [page._key]
 
-    // reset selection end of focus
-    let updatedEditorState = EditorState.forceSelection(
-      editorState,
-      new SelectionState({
-        anchorKey: selection.anchorKey,
-        anchorOffset: selection.focusOffset,
-        focusKey: selection.anchorKey,
-        focusOffset: selection.focusOffset,
-        isBackward: false,
-      })
-    )
+    const selection = updatedEditorState.getSelection()
+    const blockKey = selection.focusKey
 
-    updatedSelectionState = updatedEditorState.getSelection()
-    entityKey = contentState.getLastCreatedEntityKey()
+    createPageEdges({ variables: { source, targets, blockKey } })
 
-    const contentWithNewText = Modifier.insertText(
-      contentState,
-      updatedSelectionState,
-      ` ${page.title} `
-    )
-
-    updatedSelectionState = new SelectionState({
-      anchorKey: selection.anchorKey,
-      anchorOffset: selection.focusOffset + 1,
-      focusKey: selection.anchorKey,
-      focusOffset: selection.focusOffset + page.title.length + 1,
-      isBackward: false,
-    })
-
-    updatedEditorState = EditorState.forceSelection(
-      updatedEditorState,
-      updatedSelectionState
-    )
-
-    updatedContentState = contentWithNewText.createEntity(
-      'PAGELINK',
-      'MUTABLE',
-      {
-        pageKey: page._key,
-      }
-    )
-
-    entityKey = updatedContentState.getLastCreatedEntityKey()
-
-    updatedContentState = Modifier.applyEntity(
-      updatedContentState,
-      updatedSelectionState,
-      entityKey
-    )
-
-    updatedEditorState = EditorState.push(
-      updatedEditorState,
-      updatedContentState
-    )
-
-    props.setEditorState(
-      updatedEditorState,
-      updatedEditorState.getSelection(),
-      entityKey
-    )
+    props.setEditorState(updatedEditorState, selection, entityKey)
   }
 
   return (
@@ -141,7 +115,11 @@ export default function BlockStyleControls(props) {
         <IconButton icon="link" onClick={onOpen} />
       </Box>
 
-      <PageFinder isOpen={isOpen} onClose={onClose} onSave={handleSave} />
+      <PageFinder
+        isOpen={isOpen}
+        onClose={onClose}
+        onSave={handleAddPageLink}
+      />
     </Box>
   )
 }

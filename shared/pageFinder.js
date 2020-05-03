@@ -35,23 +35,6 @@ const query = gql`
   }
 `
 
-// const mutation = gql`
-//   mutation CreatePageEdges($source: String!, $targets: [String]!) {
-//     createPageEdges(source: $source, targets: $targets) {
-//       _id
-//       _key
-//       from {
-//         _id
-//         title
-//       }
-//       to {
-//         _id
-//         title
-//       }
-//     }
-//   }
-// `;
-
 export default function PageFinder({ isOpen, onClose, onSave }) {
   const router = useRouter()
   const { _key } = router.query
@@ -63,17 +46,9 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
     skip,
   })
 
-  // const [createPageEdges] = useMutation(mutation);
-
   const pages = data?.pages?.filter((page) => page._key !== _key) || []
 
   const handleClick = (page) => {
-    // createPageEdges({
-    //   variables: {
-    //     source: _key,
-    //     targets: selection,
-    //   },
-    // });
     onSave(page)
     onClose()
   }

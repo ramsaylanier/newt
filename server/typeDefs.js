@@ -1,6 +1,8 @@
-const gql = require("graphql-tag");
+const gql = require('graphql-tag')
 
 const typeDefs = gql`
+  scalar GenericScalar
+
   input FilterInput {
     fiter: String!
   }
@@ -9,14 +11,8 @@ const typeDefs = gql`
     _id: ID!
     _key: String
     title: String
-    blocks: [Block]
     edges: [PageEdge]
-  }
-
-  type Block {
-    id: ID!
-    content: String!
-    pages: [Page]
+    content: GenericScalar
   }
 
   type PageEdge {
@@ -24,6 +20,7 @@ const typeDefs = gql`
     _key: String
     from: Page
     to: Page
+    blockKey: String
   }
 
   type Query {
@@ -35,15 +32,18 @@ const typeDefs = gql`
     createPage(title: String!): Page
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
-    createPageEdges(source: String, targets: [String]): [PageEdge]
-    createPageBlock(id: String!): Page
-    deletePageBlock(pageId: String!, blockId: String!): Page
+    updatePageContent(id: String, content: GenericScalar): Page
+    createPageEdges(
+      source: String
+      targets: [String]
+      blockKey: String!
+    ): [PageEdge]
   }
 
   type Subscription {
     pageAdded: Page
     pageDeleted: Page
   }
-`;
+`
 
-module.exports = typeDefs;
+module.exports = typeDefs
