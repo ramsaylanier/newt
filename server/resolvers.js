@@ -4,6 +4,7 @@ const db = require('./database')
 const { aql } = require('arangojs')
 const { getPage } = require('./connectors')
 const { uuid } = require('uuidv4')
+const uniq = require('lodash/uniq')
 
 const resolvers = {
   Page: {
@@ -21,7 +22,7 @@ const resolvers = {
   },
   PageEdge: {
     from: async (parent) => {
-      const collection = db.collection('Page')
+      const collection = db.collection('Pages')
       try {
         const page = await getPage(parent._from)
         return page
@@ -30,9 +31,25 @@ const resolvers = {
       }
     },
     to: async (parent) => {
-      const collection = db.collection('Page')
+      const collection = db.collection('Pages')
       try {
         return getPage(parent._to)
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    excerpt: async (parent) => {
+      const collection = db.collection('Pages')
+      try {
+        const query = await db.query(aql`
+          FOR page IN ${collection}
+            LET blocks = page.content.blocks || []
+            FOR b in blocks
+              LET block = b || {}
+              FILTER block.key IN ${parent.blockKeys || []}
+              RETURN block 
+        `)
+        return query._result.map((r) => r.text)
       } catch (e) {
         console.log(e)
       }
@@ -54,7 +71,7 @@ const resolvers = {
         `)
         return query._result
       } catch (e) {
-        console.log(e)
+        console.log('ERROR', e)
       }
     },
     page: async (parent, args, context, info) => {
@@ -101,7 +118,7 @@ const resolvers = {
     },
     updatePageContent: async (parent, args, context, info) => {
       const collection = db.collection('Pages')
-      console.log(args)
+      const edgeCollection = db.edgeCollection('PageEdges')
       try {
         const document = await collection.document(args.id)
         const update = await collection.update(document._key, {
@@ -109,37 +126,105 @@ const resolvers = {
         })
         const newDocument = await collection.document(update)
         pubSub.publish('pageUpdated', { pageUpdated: newDocument })
+        const entityMap = args.content.entityMap
+        const blocks = args.content.blocks
+
+        let linksFromContent = []
+
+        Object.keys(entityMap).forEach(async (key) => {
+          const entity = entityMap[key]
+          const pageKey = entity.data.pageKey
+          if (entity.type === 'PAGELINK') {
+            const block = blocks.find((b) => {
+              const keys = b.entityRanges.map((r) => r.key)
+              return keys.includes(Number(key))
+            })
+            const link = { pageKey, blockKey: block.key }
+            linksFromContent.push(link)
+          }
+        })
+
+        linksFromContent = linksFromContent.reduce((links, currentLink) => {
+          const existingLink = links.find(
+            (l) => l.pageKey === currentLink.pageKey
+          )
+          if (existingLink) {
+            existingLink.blockKeys.push(currentLink.blockKey)
+          } else {
+            links.push({
+              pageKey: currentLink.pageKey,
+              blockKeys: [currentLink.blockKey],
+            })
+          }
+
+          return links
+        }, [])
+
+        const existingLinks = await edgeCollection.outEdges(`Pages/${args.id}`)
+        existingLinks.forEach((existingLink) => {
+          const contentLink = linksFromContent.find(
+            (l) => l.pageKey === existingLinks._key
+          )
+          if (contentLink) {
+            edgeCollection.update(existingLink._key, {
+              blockKey: contentLink.blockKeys,
+            })
+            linksFromContent = linksFromContent.filter(
+              (l) => l.pageKey !== contentLink.pageKey
+            )
+          } else {
+            edgeCollection.remove(existingLink._id)
+          }
+        })
+
+        linksFromContent.forEach((link) => {
+          edgeCollection.save({
+            _from: `Pages/${args.id}`,
+            _to: `Pages/${link.pageKey}`,
+            blockKeys: link.blockKeys,
+          })
+        })
+
         return newDocument
       } catch (e) {
         console.log(e)
       }
     },
-    createPageEdges: async (parent, args, context, info) => {
-      const { source, targets, blockKey } = args
+    createPageEdge: async (parent, args, context, info) => {
+      const { source, target, blockKey } = args
       const collection = db.edgeCollection('PageEdges')
-      const edges = []
       try {
+        const edges = []
         const existingEdges = await collection.outEdges(`Pages/${source}`)
-        targets.forEach(async (target) => {
-          const existingTarget = existingEdges.some((edge) => {
-            return edge._to.includes(target)
+        const existingEdge = existingEdges.find((edge) => {
+          return edge._to.includes(target)
+        })
+
+        if (existingEdge) {
+          const existingBlockKeys = existingEdge.blockKeys || []
+          existingBlockKeys.push(blockKey)
+          const newBlockKeys = uniq(existingBlockKeys)
+          const updatedEdge = await collection.update(
+            existingEdge._key,
+            {
+              blockKeys: newBlockKeys,
+            },
+            { returnNew: true }
+          )
+          edges.push(updatedEdge.new)
+        } else {
+          const newEdge = await collection.save({
+            _from: `Pages/${source}`,
+            _to: `Pages/${target}`,
+            blockKeys: [blockKey],
           })
+          const edge = await collection.edge(newEdge._id)
+          edges.push(edge)
+        }
 
-          if (!existingTarget) {
-            const edge = collection.save({
-              _from: `Pages/${source}`,
-              _to: `Pages/${target}`,
-              blockKey,
-            })
-            edges.push(edge)
-          }
-        })
-
-        return Promise.all(edges).then((values) => {
-          return values
-        })
+        return edges
       } catch (e) {
-        console.log(e)
+        console.log('ERROR', e)
       }
     },
   },

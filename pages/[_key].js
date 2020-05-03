@@ -4,8 +4,9 @@ import { useQuery } from '@apollo/react-hooks'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
-import { Box } from '@chakra-ui/core'
+import { Box, Divider, Text } from '@chakra-ui/core'
 import PageTitle from '../shared/pageTitle'
+import PageLink from '../shared/pageLink'
 import ContentBlock from '../shared/contentBlock'
 
 const query = gql`
@@ -17,6 +18,8 @@ const query = gql`
       content
       edges {
         _key
+        blockKeys
+        excerpt
         from {
           _id
           _key
@@ -42,8 +45,7 @@ const Page = () => {
   })
 
   const page = data?.page || null
-
-  console.log(page)
+  const toLinks = page?.edges?.filter((edge) => edge.to._key === _key) || []
 
   return (
     <div className="container">
@@ -57,6 +59,15 @@ const Page = () => {
           <Box p={4}>
             <PageTitle title={page.title} />
             <ContentBlock page={page} />
+
+            <Divider />
+
+            <Box mt="6">
+              <Text fontSize="xl">Other Links</Text>
+              {toLinks.map((link) => {
+                return <PageLink key={link._key} link={link} />
+              })}
+            </Box>
           </Box>
         )}
       </Layout>

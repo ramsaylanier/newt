@@ -20,7 +20,8 @@ const typeDefs = gql`
     _key: String
     from: Page
     to: Page
-    blockKey: String
+    blockKeys: [String]
+    excerpt: [String]
   }
 
   type Query {
@@ -33,9 +34,9 @@ const typeDefs = gql`
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
     updatePageContent(id: String, content: GenericScalar): Page
-    createPageEdges(
-      source: String
-      targets: [String]
+    createPageEdge(
+      source: String!
+      target: String!
       blockKey: String!
     ): [PageEdge]
   }

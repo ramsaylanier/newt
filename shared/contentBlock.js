@@ -38,6 +38,20 @@ const mutation = gql`
       _id
       _key
       title
+      content
+      edges {
+        _key
+        from {
+          _id
+          _key
+          title
+        }
+        to {
+          _id
+          _key
+          title
+        }
+      }
     }
   }
 `
@@ -54,6 +68,8 @@ export default function ContentBlock({ page }) {
     if (page?.content) {
       const content = convertFromRaw(page.content)
       setEditorState(EditorState.createWithContent(content, decorator))
+    } else {
+      setEditorState(EditorState.createEmpty(decorator))
     }
   }, [page])
 
@@ -71,7 +87,7 @@ export default function ContentBlock({ page }) {
     setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle))
   }
 
-  const handleClick = () => {
+  const handleSave = () => {
     const content = convertToRaw(editorState.getCurrentContent())
     updatePageContent({ variables: { id: _key, content } })
   }
@@ -96,7 +112,7 @@ export default function ContentBlock({ page }) {
           spellCheck={true}
         />
       </Box>
-      <Button mt="4" variantColor="green" size="lg" onClick={handleClick}>
+      <Button mt="4" variantColor="green" size="lg" onClick={handleSave}>
         Save
       </Button>
 
@@ -135,15 +151,6 @@ export default function ContentBlock({ page }) {
         h5 {
           font-size: 1.33333em;
           margin-bottom: 0.80808rem;
-        }
-
-        p {
-          margin: auto auto 1.5rem;
-        }
-
-        p + p {
-          text-indent: 1.5rem;
-          margin-top: -1.5rem;
         }
       `}</style>
     </Box>

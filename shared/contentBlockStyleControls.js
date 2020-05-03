@@ -29,12 +29,12 @@ const INLINE_STYLES = [
 ]
 
 const mutation = gql`
-  mutation CreatePageEdges(
+  mutation CreatePageEdge(
     $source: String!
-    $targets: [String]!
+    $target: String!
     $blockKey: String!
   ) {
-    createPageEdges(source: $source, targets: $targets, blockKey: $blockKey) {
+    createPageEdge(source: $source, target: $target, blockKey: $blockKey) {
       _id
       _key
       from {
@@ -68,7 +68,7 @@ export default function BlockStyleControls(props) {
   const { _key } = router.query
   const { isOpen, onClose, onOpen } = useDisclosure()
   const { editorState, onToggle, onToggleStyles } = props
-  const [createPageEdges] = useMutation(mutation)
+  const [createPageEdge] = useMutation(mutation)
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
   const blockType = contentState
@@ -79,13 +79,10 @@ export default function BlockStyleControls(props) {
   const handleAddPageLink = (page) => {
     const { updatedEditorState, entityKey } = addPageLink(editorState, page)
     const source = _key
-    const targets = [page._key]
-
+    const target = page._key
     const selection = updatedEditorState.getSelection()
     const blockKey = selection.focusKey
-
-    createPageEdges({ variables: { source, targets, blockKey } })
-
+    createPageEdge({ variables: { source, target, blockKey } })
     props.setEditorState(updatedEditorState, selection, entityKey)
   }
 
