@@ -1,5 +1,6 @@
-import Sidebar from "./sidebar";
-import { Box, Grid } from "@chakra-ui/core";
+import React from 'react'
+import Sidebar from './sidebar'
+import { Box, Grid } from '@chakra-ui/core'
 
 export default function Layout(props) {
   return (
@@ -16,5 +17,5 @@ export default function Layout(props) {
         {props.children}
       </Box>
     </Grid>
-  );
+  )
 }

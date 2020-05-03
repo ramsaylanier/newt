@@ -1,18 +1,13 @@
-import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
-import {
-  Box,
-  ButtonGroup,
-  IconButton,
-  Textarea,
-  InputGroup,
-  InputRightElement,
-} from "@chakra-ui/core";
-import { Editor, EditorState, RichUtils } from "draft-js";
-import ContentBlockStyleControls from "./contentBlockStyleControls";
+import React from 'react'
+import { useRouter } from 'next/router'
 
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { Box, IconButton } from '@chakra-ui/core'
+import { Editor, EditorState, RichUtils, CompositeDecorator } from 'draft-js'
+import ContentBlockStyleControls from './contentBlockStyleControls'
+import ContentBlockPageLink from './contentBlockPageLink'
+
+import gql from 'graphql-tag'
+import { useMutation } from '@apollo/react-hooks'
 
 const mutation = gql`
   mutation DeletePageBlock($pageId: String!, $blockId: String!) {
@@ -24,39 +19,62 @@ const mutation = gql`
       }
     }
   }
-`;
+`
+
+const getPageLink = (contentBlock, callback, contentState) => {
+  contentBlock.findEntityRanges((character) => {
+    const entityKey = character.getEntity()
+    if (entityKey === null) {
+      return false
+    }
+    const entity = contentState.getEntity(entityKey)
+    return entity.type === 'PAGELINK'
+  }, callback)
+}
+
+const decorator = new CompositeDecorator([
+  {
+    strategy: getPageLink,
+    component: ContentBlockPageLink,
+  },
+])
 
 export default function ContentBlock({ block }) {
   const [editorState, setEditorState] = React.useState(
-    EditorState.createEmpty()
-  );
+    EditorState.createEmpty(decorator)
+  )
 
-  const editorRef = React.useRef(null);
-  const router = useRouter();
-  const { _key } = router.query;
-  const [value, setValue] = React.useState(block.title);
-  const [deletePageBlock] = useMutation(mutation);
+  const editorRef = React.useRef(null)
+  const router = useRouter()
+  const { _key } = router.query
+  const [deletePageBlock] = useMutation(mutation)
 
   const handleDelete = () => {
     deletePageBlock({
       variables: { pageId: `Pages/${_key}`, blockId: block.id },
-    });
-  };
+    })
+  }
 
-  const handleChange = (e) => {
-    setValue(e.target.value);
-  };
+  const handleChange = (state) => {
+    setEditorState(state)
+  }
 
   const handleToggle = (blockType) => {
-    setEditorState(RichUtils.toggleBlockType(editorState, blockType));
-  };
+    setEditorState(RichUtils.toggleBlockType(editorState, blockType))
+  }
+
+  const handleToggleStyles = (inlineStyle) => {
+    setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle))
+  }
 
   return (
     <Box p="1" bg="gray.100" mb="4">
       <Box display="flex" justifyContent="space-between" mb="4">
         <ContentBlockStyleControls
           editorState={editorState}
+          setEditorState={setEditorState}
           onToggle={handleToggle}
+          onToggleStyles={handleToggleStyles}
         />
         <IconButton icon="small-close" onClick={handleDelete} />
       </Box>
@@ -65,7 +83,7 @@ export default function ContentBlock({ block }) {
         <Editor
           ref={editorRef}
           editorState={editorState}
-          onChange={setEditorState}
+          onChange={handleChange}
           placeholder="Enter some content..."
           spellCheck={true}
         />
@@ -118,5 +136,5 @@ export default function ContentBlock({ block }) {
         }
       `}</style>
     </Box>
-  );
+  )
 }

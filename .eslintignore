@@ -1,0 +1,9 @@
+node_modules/
+server/
+server.js
+public/
+.next/
+*.css
+*.md
+*.json
+*.lock

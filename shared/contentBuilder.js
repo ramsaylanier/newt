@@ -1,8 +1,9 @@
-import { ButtonGroup, Modal, IconButton, useDisclosure } from "@chakra-ui/core";
-import PageFinder from "./pageFinder";
-import { useRouter } from "next/router";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import React from 'react'
+import { ButtonGroup, IconButton, useDisclosure } from '@chakra-ui/core'
+import PageFinder from './pageFinder'
+import { useRouter } from 'next/router'
+import gql from 'graphql-tag'
+import { useMutation } from '@apollo/react-hooks'
 
 const mutation = gql`
   mutation CreatePageBlock($id: String!) {
@@ -14,29 +15,29 @@ const mutation = gql`
       }
     }
   }
-`;
+`
 
 export default function ContentBuilder() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [createPageBlock, { data }] = useMutation(mutation);
-  const router = useRouter();
-  const { _key } = router.query;
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [createPageBlock, { data }] = useMutation(mutation)
+  const router = useRouter()
+  const { _key } = router.query
 
   // focus new node
   React.useEffect(() => {
     if (data) {
-      const blocks = data?.createPageBlock?.blocks;
-      const newBlock = blocks[blocks.length - 1];
-      const newBlockNode = document.getElementById(`block-${newBlock.id}`);
+      const blocks = data?.createPageBlock?.blocks
+      const newBlock = blocks[blocks.length - 1]
+      const newBlockNode = document.getElementById(`block-${newBlock.id}`)
       if (newBlockNode) {
-        newBlockNode.focus();
+        newBlockNode.focus()
       }
     }
-  }, [data]);
+  }, [data])
 
   const handleAdd = () => {
-    createPageBlock({ variables: { id: `Pages/${_key}` } });
-  };
+    createPageBlock({ variables: { id: `Pages/${_key}` } })
+  }
 
   return (
     <React.Fragment>
@@ -47,5 +48,5 @@ export default function ContentBuilder() {
 
       <PageFinder isOpen={isOpen} onClose={onClose} />
     </React.Fragment>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import gql from "graphql-tag";
-import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
-import RouteLink from "next/link";
-import PageList from "./pageList";
+import React from 'react'
+import gql from 'graphql-tag'
+import { useMutation } from '@apollo/react-hooks'
+import PageList from './pageList'
 import {
   useDisclosure,
   Box,
@@ -14,27 +14,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Link,
-  Icon,
-} from "@chakra-ui/core";
-
-const query = gql`
-  query AllPages {
-    pages {
-      _id
-      title
-    }
-  }
-`;
-
-const subscription = gql`
-  subscription onPageAdded {
-    pageAdded {
-      _id
-      title
-    }
-  }
-`;
+} from '@chakra-ui/core'
 
 const addMutation = gql`
   mutation CreatePage($title: String!) {
@@ -43,33 +23,21 @@ const addMutation = gql`
       title
     }
   }
-`;
+`
 
-const deleteMutation = gql`
-  mutation DeletePage($id: String!) {
-    deletePage(id: $id) {
-      _id
-      title
-    }
+export default function Sidebar() {
+  const [title, setTitle] = React.useState('')
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [createPage] = useMutation(addMutation)
+
+  const handleCreate = () => {
+    createPage({ variables: { title } })
+    onClose()
   }
-`;
-
-export default function Sidebar(props) {
-  const [title, setTitle] = React.useState("");
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { data, loading, error } = useQuery(query);
-  const [createPage] = useMutation(addMutation);
-
-  const pages = data?.pages || [];
-
-  const handleCreate = (e) => {
-    createPage({ variables: { title } });
-    onClose();
-  };
 
   const handleChange = (e) => {
-    setTitle(e.target.value);
-  };
+    setTitle(e.target.value)
+  }
 
   return (
     <Box
@@ -110,5 +78,5 @@ export default function Sidebar(props) {
         </ModalContent>
       </Modal>
     </Box>
-  );
+  )
 }

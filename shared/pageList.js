@@ -1,21 +1,8 @@
-import gql from "graphql-tag";
-import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
-import RouteLink from "next/link";
-import {
-  List,
-  ListItem,
-  Input,
-  Button,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Link,
-  Icon,
-} from "@chakra-ui/core";
+import React from 'react'
+import gql from 'graphql-tag'
+import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks'
+import RouteLink from 'next/link'
+import { List, ListItem, Button, Link, Icon } from '@chakra-ui/core'
 
 const query = gql`
   query AllPages {
@@ -25,7 +12,7 @@ const query = gql`
       title
     }
   }
-`;
+`
 
 const addedSubscription = gql`
   subscription onPageAdded {
@@ -35,7 +22,7 @@ const addedSubscription = gql`
       title
     }
   }
-`;
+`
 
 const deletedSubscription = gql`
   subscription onPageDeleted {
@@ -45,7 +32,7 @@ const deletedSubscription = gql`
       title
     }
   }
-`;
+`
 
 const deleteMutation = gql`
   mutation DeletePage($id: String!) {
@@ -55,39 +42,38 @@ const deleteMutation = gql`
       title
     }
   }
-`;
+`
 
-export default function Sidebar(props) {
-  const [title, setTitle] = React.useState("");
-  const { data, loading, error } = useQuery(query);
+export default function Sidebar() {
+  const { data } = useQuery(query)
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageAdded) {
-        const d = client.readQuery({ query });
-        d.pages.push(data.pageAdded);
-        client.writeQuery({ query, data: d });
+        const d = client.readQuery({ query })
+        d.pages.push(data.pageAdded)
+        client.writeQuery({ query, data: d })
       }
     },
-  });
+  })
 
   useSubscription(deletedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageDeleted) {
-        const d = client.readQuery({ query });
-        d.pages = d.pages.filter((p) => p._id !== data.pageDeleted._id);
-        client.writeQuery({ query, data: d });
+        const d = client.readQuery({ query })
+        d.pages = d.pages.filter((p) => p._id !== data.pageDeleted._id)
+        client.writeQuery({ query, data: d })
       }
     },
-  });
+  })
 
-  const [deletePage] = useMutation(deleteMutation);
+  const [deletePage] = useMutation(deleteMutation)
 
-  const pages = data?.pages || [];
+  const pages = data?.pages || []
 
   const handleDelete = (page) => {
-    deletePage({ variables: { id: page._id } });
-  };
+    deletePage({ variables: { id: page._id } })
+  }
 
   return (
     <List>
@@ -105,7 +91,7 @@ export default function Sidebar(props) {
             whiteSpace="nowrap"
             maxWidth={200}
           >
-            <RouteLink href={"[_key]"} as={page._key}>
+            <RouteLink href={'[_key]'} as={page._key}>
               <Link overflow="hidden" textOverflow="ellipsis" flex="1">
                 {page.title}
               </Link>
@@ -114,8 +100,8 @@ export default function Sidebar(props) {
               <Icon name="delete" size="12px" />
             </Button>
           </ListItem>
-        );
+        )
       })}
     </List>
-  );
+  )
 }

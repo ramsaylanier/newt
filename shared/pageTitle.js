@@ -1,13 +1,14 @@
-import { useRouter } from "next/router";
+import React from 'react'
+import { useRouter } from 'next/router'
 import {
   Text,
   Input,
   InputGroup,
   InputRightElement,
   IconButton,
-} from "@chakra-ui/core";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+} from '@chakra-ui/core'
+import { useMutation } from '@apollo/react-hooks'
+import gql from 'graphql-tag'
 
 const mutation = gql`
   mutation UpdatePageTitle($id: String!, $title: String!) {
@@ -17,45 +18,45 @@ const mutation = gql`
       title
     }
   }
-`;
+`
 
 export default function PageTitle({ title }) {
-  const router = useRouter();
-  const { _key } = router.query;
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [value, setValue] = React.useState(title);
-  const inputRef = React.useRef();
+  const router = useRouter()
+  const { _key } = router.query
+  const [isEditing, setIsEditing] = React.useState(false)
+  const [value, setValue] = React.useState(title)
+  const inputRef = React.useRef()
 
-  const [updatePageTitle] = useMutation(mutation);
+  const [updatePageTitle] = useMutation(mutation)
 
   React.useEffect(() => {
-    setValue(title);
+    setValue(title)
     if (isEditing) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [isEditing]);
+  }, [isEditing])
 
   React.useEffect(() => {
-    setIsEditing(false);
-  }, [title]);
+    setIsEditing(false)
+  }, [title])
 
   const handleClick = () => {
-    setIsEditing(!isEditing);
-  };
+    setIsEditing(!isEditing)
+  }
 
   const handleChange = (e) => {
-    setValue(e.target.value);
-  };
+    setValue(e.target.value)
+  }
 
-  const handleCancel = (e) => {
-    setIsEditing(false);
-  };
+  const handleCancel = () => {
+    setIsEditing(false)
+  }
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    updatePageTitle({ variables: { id: _key, title: value } });
-    setIsEditing(false);
-  };
+    e.preventDefault()
+    updatePageTitle({ variables: { id: _key, title: value } })
+    setIsEditing(false)
+  }
 
   return (
     <React.Fragment>
@@ -91,5 +92,5 @@ export default function PageTitle({ title }) {
         </Text>
       )}
     </React.Fragment>
-  );
+  )
 }

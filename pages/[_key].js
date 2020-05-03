@@ -1,12 +1,13 @@
-import gql from "graphql-tag";
-import { useQuery } from "@apollo/react-hooks";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import Layout from "../shared/layout";
-import { Box, Text } from "@chakra-ui/core";
-import PageTitle from "../shared/pageTitle";
-import ContentBuilder from "../shared/contentBuilder";
-import ContentBlock from "../shared/contentBlock";
+import React from 'react'
+import gql from 'graphql-tag'
+import { useQuery } from '@apollo/react-hooks'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
+import Layout from '../shared/layout'
+import { Box } from '@chakra-ui/core'
+import PageTitle from '../shared/pageTitle'
+import ContentBuilder from '../shared/contentBuilder'
+import ContentBlock from '../shared/contentBlock'
 
 const query = gql`
   query Page($id: String!) {
@@ -33,19 +34,19 @@ const query = gql`
       }
     }
   }
-`;
+`
 
 const Page = () => {
-  const router = useRouter();
-  const { _key } = router.query;
-  const skip = !_key;
-  const { data, loading, error } = useQuery(query, {
+  const router = useRouter()
+  const { _key } = router.query
+  const skip = !_key
+  const { data } = useQuery(query, {
     variables: { id: `Pages/${_key}` },
     skip,
-  });
+  })
 
-  const page = data?.page || null;
-  const blocks = page?.blocks || [];
+  const page = data?.page || null
+  const blocks = page?.blocks || []
 
   return (
     <div className="container">
@@ -61,7 +62,7 @@ const Page = () => {
             <PageTitle title={page.title} />
 
             {blocks.map((block) => {
-              return <ContentBlock key={block.id} block={block} />;
+              return <ContentBlock key={block.id} block={block} />
             })}
 
             <ContentBuilder />
@@ -69,7 +70,7 @@ const Page = () => {
         )}
       </Layout>
     </div>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

@@ -1,5 +1,6 @@
-import Head from "next/head";
-import Layout from "../shared/layout";
+import React from 'react'
+import Head from 'next/head'
+import Layout from '../shared/layout'
 
 export default function Home() {
   return (
@@ -12,5 +13,5 @@ export default function Home() {
 
       <Layout></Layout>
     </div>
-  );
+  )
 }

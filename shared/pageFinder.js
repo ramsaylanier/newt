@@ -1,7 +1,9 @@
-import gql from "graphql-tag";
-import { useRouter } from "next/router";
-import { useQuery, useMutation, useSubscription } from "@apollo/react-hooks";
+import React from 'react'
+import gql from 'graphql-tag'
+import { useRouter } from 'next/router'
+import { useQuery } from '@apollo/react-hooks'
 import {
+  Box,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -10,11 +12,7 @@ import {
   ModalContent,
   ModalFooter,
   Button,
-  List,
-  ListItem,
-  Checkbox,
-  CheckboxGroup,
-} from "@chakra-ui/core";
+} from '@chakra-ui/core'
 
 const query = gql`
   query PageQuery {
@@ -35,75 +33,67 @@ const query = gql`
       }
     }
   }
-`;
+`
 
-const mutation = gql`
-  mutation CreatePageEdges($source: String!, $targets: [String]!) {
-    createPageEdges(source: $source, targets: $targets) {
-      _id
-      _key
-      from {
-        _id
-        title
-      }
-      to {
-        _id
-        title
-      }
-    }
-  }
-`;
+// const mutation = gql`
+//   mutation CreatePageEdges($source: String!, $targets: [String]!) {
+//     createPageEdges(source: $source, targets: $targets) {
+//       _id
+//       _key
+//       from {
+//         _id
+//         title
+//       }
+//       to {
+//         _id
+//         title
+//       }
+//     }
+//   }
+// `;
 
-export default function PageFinder({ isOpen, onClose }) {
-  const router = useRouter();
-  const { _key } = router.query;
-  const [selection, setSelection] = React.useState([]);
-  const filters = {};
-  const skip = !isOpen;
+export default function PageFinder({ isOpen, onClose, onSave }) {
+  const router = useRouter()
+  const { _key } = router.query
+  const filters = {}
+  const skip = !isOpen
 
-  const { data, loading, error } = useQuery(query, {
+  const { data } = useQuery(query, {
     variables: { filters },
     skip,
-  });
+  })
 
-  const [createPageEdges] = useMutation(mutation);
+  // const [createPageEdges] = useMutation(mutation);
 
-  const pages = data?.pages?.filter((page) => page._key !== _key) || [];
+  const pages = data?.pages?.filter((page) => page._key !== _key) || []
 
-  const handleClick = () => {
-    createPageEdges({
-      variables: {
-        source: _key,
-        targets: selection,
-      },
-    });
-  };
-
-  const handleChange = (selection) => {
-    setSelection(selection);
-  };
+  const handleClick = (page) => {
+    // createPageEdges({
+    //   variables: {
+    //     source: _key,
+    //     targets: selection,
+    //   },
+    // });
+    onSave(page)
+    onClose()
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent bg="white">
-        <ModalHeader>Link Pages</ModalHeader>
+        <ModalHeader>Link A Page</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <CheckboxGroup
-            variantColor="green"
-            defaultValue={[]}
-            onChange={handleChange}
-          >
+          <Box display="flex" flexDir="column" alignItems="flex-start">
             {pages.map((page) => {
               return (
-                <Checkbox key={page._key} value={page._key}>
+                <Button key={page._key} onClick={() => handleClick(page)}>
                   {page.title}
-                </Checkbox>
-              );
+                </Button>
+              )
             })}
-          </CheckboxGroup>
-          {}
+          </Box>
         </ModalBody>
 
         <ModalFooter>
@@ -114,5 +104,5 @@ export default function PageFinder({ isOpen, onClose }) {
         </ModalFooter>
       </ModalContent>
     </Modal>
-  );
+  )
 }
