@@ -51,6 +51,7 @@ export default function Sidebar() {
       <Button onClick={onOpen} mb="2">
         Create Page
       </Button>
+
       <PageList />
 
       <Modal isOpen={isOpen} onClose={onClose}>

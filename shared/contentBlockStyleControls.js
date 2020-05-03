@@ -68,17 +68,17 @@ export default function BlockStyleControls(props) {
     updatedSelectionState = updatedEditorState.getSelection()
     entityKey = contentState.getLastCreatedEntityKey()
 
-    // const contentWithNewText = Modifier.insertText(
-    //   contentState,
-    //   updatedSelectionState,
-    //   ` ${page.title} `
-    // )
+    const contentWithNewText = Modifier.insertText(
+      contentState,
+      updatedSelectionState,
+      ` ${page.title} `
+    )
 
     updatedSelectionState = new SelectionState({
       anchorKey: selection.anchorKey,
-      anchorOffset: selection.focusOffset,
+      anchorOffset: selection.focusOffset + 1,
       focusKey: selection.anchorKey,
-      focusOffset: selection.focusOffset + page.title.length,
+      focusOffset: selection.focusOffset + page.title.length + 1,
       isBackward: false,
     })
 
@@ -87,9 +87,7 @@ export default function BlockStyleControls(props) {
       updatedSelectionState
     )
 
-    updatedContentState = updatedEditorState.getCurrentContent()
-
-    updatedContentState = updatedContentState.createEntity(
+    updatedContentState = contentWithNewText.createEntity(
       'PAGELINK',
       'MUTABLE',
       {
