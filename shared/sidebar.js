@@ -1,4 +1,5 @@
 import React from 'react'
+import { useRouter } from 'next/router'
 import gql from 'graphql-tag'
 import { useMutation } from '@apollo/react-hooks'
 import PageList from './pageList'
@@ -20,19 +21,29 @@ const addMutation = gql`
   mutation CreatePage($title: String!) {
     createPage(title: $title) {
       _id
+      _key
       title
     }
   }
 `
 
 export default function Sidebar() {
+  const router = useRouter()
   const [title, setTitle] = React.useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [createPage] = useMutation(addMutation)
+  const [createPage, { data }] = useMutation(addMutation)
 
-  const handleCreate = () => {
+  React.useEffect(() => {
+    if (data) {
+      router.push('/[_key]', `/${data.createPage._key}`)
+    }
+  }, [data])
+
+  const handleCreate = (e) => {
+    e.preventDefault()
     createPage({ variables: { title } })
     onClose()
+    setTitle('')
   }
 
   const handleChange = (e) => {
@@ -54,26 +65,25 @@ export default function Sidebar() {
 
       <PageList />
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent bg="white">
           <ModalHeader>Create Page</ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            <Input
-              value={title}
-              onChange={handleChange}
-              placeholder="Page Title"
-              size="sm"
-            />
+          <ModalBody mt="2" mb="4">
+            <form onSubmit={handleCreate}>
+              <Input
+                value={title}
+                onChange={handleChange}
+                placeholder="Page Title"
+                bg="gray.100"
+              />
+            </form>
           </ModalBody>
 
-          <ModalFooter>
-            <Button variantColor="blue" mr={3} onClick={handleCreate}>
+          <ModalFooter bg="green.200">
+            <Button variantColor="green" mr={3} onClick={handleCreate}>
               Create
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              Close
             </Button>
           </ModalFooter>
         </ModalContent>

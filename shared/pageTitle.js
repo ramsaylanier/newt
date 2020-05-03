@@ -86,7 +86,7 @@ export default function PageTitle({ title }) {
           </InputGroup>
         </form>
       ) : (
-        <Text fontSize="3xl">
+        <Text fontSize="3xl" mb="4">
           {title}
           <IconButton icon="edit" onClick={handleClick} />
         </Text>

@@ -57,13 +57,15 @@ const Page = () => {
       <Layout>
         {page && (
           <Box p={4}>
-            <PageTitle title={page.title} />
-            <ContentBlock page={page} />
+            <Box mb="6">
+              <PageTitle title={page.title} />
+              <ContentBlock page={page} />
+            </Box>
 
-            <Divider />
+            <Divider color="gray.400" />
 
             <Box mt="6">
-              <Text fontSize="xl">Other Links</Text>
+              <Text fontSize="xl">Mentioned In</Text>
               {toLinks.map((link) => {
                 return <PageLink key={link._key} link={link} />
               })}

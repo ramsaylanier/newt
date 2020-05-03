@@ -11,7 +11,7 @@ import {
   convertToRaw,
   convertFromRaw,
 } from 'draft-js'
-import ContentBlockStyleControls from './contentBlockStyleControls'
+import ContentBlockControls from './contentBlockControls'
 import ContentBlockPageLink from './contentBlockPageLink'
 
 const getPageLink = (contentBlock, callback, contentState) => {
@@ -95,7 +95,7 @@ export default function ContentBlock({ page }) {
   return (
     <Box>
       <Box bg="gray.100">
-        <ContentBlockStyleControls
+        <ContentBlockControls
           editorState={editorState}
           setEditorState={setEditorState}
           onToggle={handleToggle}

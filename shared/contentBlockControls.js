@@ -5,7 +5,6 @@ import { addPageLink } from '../utils/draftUtil'
 import gql from 'graphql-tag'
 import { useMutation } from '@apollo/react-hooks'
 import { useRouter } from 'next/router'
-import { convertToRaw } from 'draft-js'
 
 const BLOCK_TYPES = [
   { label: 'H1', style: 'header-one' },
@@ -63,7 +62,7 @@ const StyleButton = (props) => {
   )
 }
 
-export default function BlockStyleControls(props) {
+export default function ContentBlockControls(props) {
   const router = useRouter()
   const { _key } = router.query
   const { isOpen, onClose, onOpen } = useDisclosure()

@@ -57,13 +57,20 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent bg="white">
-        <ModalHeader>Link A Page</ModalHeader>
+        <ModalHeader>Insert A Page Link</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Box display="flex" flexDir="column" alignItems="flex-start">
+          <Box display="flex" flexDir="column" alignItems="flex-start" mb="4">
             {pages.map((page) => {
               return (
-                <Button key={page._key} onClick={() => handleClick(page)}>
+                <Button
+                  key={page._key}
+                  variant="outline"
+                  variantColor="black"
+                  onClick={() => handleClick(page)}
+                  size="sm"
+                  mb="2"
+                >
                   {page.title}
                 </Button>
               )
@@ -71,11 +78,10 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
           </Box>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter bg="green.200">
           <Button mr={3} onClick={onClose}>
             Close
           </Button>
-          <Button onClick={handleClick}>Add Links</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
