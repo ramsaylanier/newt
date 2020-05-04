@@ -55,3 +55,22 @@ export const addPageLink = (editorState, page) => {
 
   return { updatedEditorState, entityKey }
 }
+
+export const addHttpLink = (editorState, urlValue) => {
+  const selection = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+  let updatedContentState = contentState.createEntity('LINK', 'MUTABLE', {
+    url: urlValue,
+  })
+  const entityKey = updatedContentState.getLastCreatedEntityKey()
+
+  updatedContentState = Modifier.applyEntity(
+    updatedContentState,
+    selection,
+    entityKey
+  )
+
+  const updatedEditorState = EditorState.push(editorState, updatedContentState)
+
+  return { updatedEditorState, entityKey }
+}

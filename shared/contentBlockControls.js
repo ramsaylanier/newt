@@ -14,7 +14,8 @@ import {
 } from '@chakra-ui/core'
 import PageFinder from './pageFinder'
 import { RichUtils } from 'draft-js'
-import { addPageLink } from '../utils/draftUtil'
+import { addPageLink, addHttpLink } from '../utils/draftUtil'
+import CreateHttpLinkAction from './createHttpLinkAction'
 
 const TEXT_TYPES = [
   { label: 'Heading 1', style: 'header-one', tag: 'h1' },
@@ -59,6 +60,11 @@ const StyleIconButton = (props) => {
 
 export default function ContentBlockControls(props) {
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const {
+    isOpen: isHttpLinkOpen,
+    onClose: onHttpLinkClose,
+    onOpen: onHttpLinkOpen,
+  } = useDisclosure()
   const { editorState, onToggle, onToggleStyles } = props
   const selection = editorState.getSelection()
   const contentState = editorState.getCurrentContent()
@@ -78,6 +84,14 @@ export default function ContentBlockControls(props) {
     props.setEditorState(updatedEditorState, selection, entityKey)
   }
 
+  const handleAddHttpLink = (urlValue) => {
+    const { updatedEditorState, entityKey } = addHttpLink(editorState, urlValue)
+    const selection = updatedEditorState.getSelection()
+    props.setEditorState(
+      RichUtils.toggleLink(updatedEditorState, selection, entityKey)
+    )
+  }
+
   return (
     <Box className="RichEditor-controls">
       <Flex>
@@ -85,7 +99,7 @@ export default function ContentBlockControls(props) {
           <MenuButton as={Button} rightIcon="chevron-down">
             {currentTextStyle}
           </MenuButton>
-          <MenuList bg="white">
+          <MenuList bg="white" fontSize=".9rem">
             {TEXT_TYPES.map((type) => {
               return (
                 <MenuItem key={type.label} onClick={() => onToggle(type.style)}>
@@ -120,12 +134,21 @@ export default function ContentBlockControls(props) {
           />
         ))}
         <IconButton icon="link" onClick={onOpen} />
+        <IconButton icon="http" fontSize="1.8rem" onClick={onHttpLinkOpen} />
       </Flex>
 
       <PageFinder
         isOpen={isOpen}
         onClose={onClose}
         onSave={handleAddPageLink}
+      />
+
+      <CreateHttpLinkAction
+        isOpen={isHttpLinkOpen}
+        onClose={onHttpLinkClose}
+        onSave={handleAddHttpLink}
+        editorState={editorState}
+        setEditorState={props.setEditorState}
       />
     </Box>
   )

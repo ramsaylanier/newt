@@ -13,6 +13,7 @@ import {
 } from 'draft-js'
 import ContentBlockControls from './contentBlockControls'
 import ContentBlockPageLink from './contentBlockPageLink'
+import ContentBlockHttpLink from './contentBlockHttpLink'
 
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -25,10 +26,25 @@ const getPageLink = (contentBlock, callback, contentState) => {
   }, callback)
 }
 
+const getHttpLink = (contentBlock, callback, contentState) => {
+  contentBlock.findEntityRanges((character) => {
+    const entityKey = character.getEntity()
+    if (entityKey === null) {
+      return false
+    }
+    const entity = contentState.getEntity(entityKey)
+    return entity.type === 'LINK'
+  }, callback)
+}
+
 const decorator = new CompositeDecorator([
   {
     strategy: getPageLink,
     component: ContentBlockPageLink,
+  },
+  {
+    strategy: getHttpLink,
+    component: ContentBlockHttpLink,
   },
 ])
 
@@ -76,6 +92,7 @@ export default function ContentBlock({ page }) {
   const editorRef = React.useRef(null)
 
   const handleChange = (state) => {
+    console.log('change')
     setEditorState(state)
   }
 
@@ -94,7 +111,7 @@ export default function ContentBlock({ page }) {
   }
 
   return (
-    <Box fontSize=".8rem">
+    <Box fontSize=".9rem">
       <Box bg="gray.100" position="relative" zIndex="2">
         <ContentBlockControls
           editorState={editorState}
@@ -118,44 +135,59 @@ export default function ContentBlock({ page }) {
       </Button>
 
       <style global jsx>{`
+        html {
+          font-size: 100%;
+        } /*16px*/
+
+        body {
+          background-color: white;
+          font-weight: 400;
+          line-height: 1.65;
+          color: #333;
+        }
+
+        p {
+          margin-bottom: 1.15rem;
+        }
+
         h1,
         h2,
         h3,
         h4,
-        h5,
-        h6 {
-          text-rendering: optimizeLegibility;
-          line-height: 1;
-          margin-top: 0;
+        h5 {
+          margin: 2.75rem 0 1.05rem;
+          font-weight: 400;
+          line-height: 1.15;
         }
 
         h1 {
-          font-size: 4em;
-          margin-bottom: 2.42424rem;
+          margin-top: 0;
+          font-size: 2.488em;
         }
 
         h2 {
-          font-size: 3.33333em;
-          margin-bottom: 2.0202rem;
+          font-size: 2.074em;
         }
 
         h3 {
-          font-size: 2.66667em;
-          margin-bottom: 1.61616rem;
+          font-size: 1.728em;
         }
 
         h4 {
-          font-size: 2em;
-          margin-bottom: 1.21212rem;
+          font-size: 1.44em;
         }
 
         h5 {
-          font-size: 1.33333em;
-          margin-bottom: 0.80808rem;
+          font-size: 1.2em;
         }
 
-        p {
-          font-size: 1.2em;
+        small,
+        .text_small {
+          font-size: 0.833em;
+        }
+
+        a {
+          text-decoration: underline;
         }
       `}</style>
     </Box>
