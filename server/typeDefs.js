@@ -24,9 +24,16 @@ const typeDefs = gql`
     excerpt: [String]
   }
 
+  type Graph {
+    name: String
+    nodes: [Page]
+    edges: [PageEdge]
+  }
+
   type Query {
     pages(filters: [FilterInput]): [Page]
     page(id: String!): Page
+    graph(name: String!): Graph
   }
 
   type Mutation {

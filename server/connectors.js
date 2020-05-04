@@ -15,4 +15,16 @@ const getPage = async (pageId) => {
   }
 }
 
-module.exports = { getPage }
+const getGraph = async (graphName) => {
+  const graph = await db.graph(graphName)
+  const edges = await graph.edgeCollection('PageEdges').all()
+  const nodes = await graph.vertexCollection('Pages').all()
+  console.log(nodes._result)
+  return {
+    name: graphName,
+    edges: edges._result,
+    nodes: nodes._result,
+  }
+}
+
+module.exports = { getPage, getGraph }

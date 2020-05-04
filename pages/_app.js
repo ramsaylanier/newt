@@ -5,6 +5,7 @@ import { ApolloProvider } from '@apollo/react-hooks'
 import client from '../graphql/client'
 import theme from '../theme'
 import '../normalize.css'
+import '../typeplate.css'
 import 'draft-js/dist/Draft.css'
 
 class App extends NextApp {

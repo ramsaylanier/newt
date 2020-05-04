@@ -2,7 +2,7 @@ const { PubSub } = require('graphql-subscriptions')
 const pubSub = new PubSub()
 const db = require('./database')
 const { aql } = require('arangojs')
-const { getPage } = require('./connectors')
+const { getPage, getGraph } = require('./connectors')
 const { uuid } = require('uuidv4')
 const uniq = require('lodash/uniq')
 
@@ -55,6 +55,15 @@ const resolvers = {
       }
     },
   },
+  Graph: {
+    nodes: async (parent, args) => {
+      return parent.nodes
+    },
+    edges: async (parent, args) => {
+      console.log(parent.edges)
+      return parent.edges
+    },
+  },
   Query: {
     pages: async (parent, args, context, info) => {
       const collection = db.collection('Pages')
@@ -76,6 +85,9 @@ const resolvers = {
     },
     page: async (parent, args, context, info) => {
       return getPage(args.id)
+    },
+    graph: async (parent, args, context, info) => {
+      return getGraph(args.name)
     },
   },
   Mutation: {
