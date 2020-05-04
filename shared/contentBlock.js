@@ -80,6 +80,7 @@ export default function ContentBlock({ page }) {
   }
 
   const handleToggle = (blockType) => {
+    console.log(blockType)
     setEditorState(RichUtils.toggleBlockType(editorState, blockType))
   }
 
@@ -93,8 +94,8 @@ export default function ContentBlock({ page }) {
   }
 
   return (
-    <Box>
-      <Box bg="gray.100">
+    <Box fontSize=".8rem">
+      <Box bg="gray.100" position="relative" zIndex="2">
         <ContentBlockControls
           editorState={editorState}
           setEditorState={setEditorState}
@@ -103,7 +104,7 @@ export default function ContentBlock({ page }) {
         />
       </Box>
 
-      <Box px="4" py="8" bg="gray.100">
+      <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
         <Editor
           ref={editorRef}
           editorState={editorState}
@@ -151,6 +152,10 @@ export default function ContentBlock({ page }) {
         h5 {
           font-size: 1.33333em;
           margin-bottom: 0.80808rem;
+        }
+
+        p {
+          font-size: 1.2em;
         }
       `}</style>
     </Box>

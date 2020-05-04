@@ -1,30 +1,44 @@
 import React from 'react'
-import { Box, Button, IconButton, useDisclosure } from '@chakra-ui/core'
+import {
+  Box,
+  Button,
+  Flex,
+  Divider,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/core'
 import PageFinder from './pageFinder'
+import { RichUtils } from 'draft-js'
 import { addPageLink } from '../utils/draftUtil'
 
+const TEXT_TYPES = [
+  { label: 'Heading 1', style: 'header-one', tag: 'h1' },
+  { label: 'Heading 2', style: 'header-two', tag: 'h2' },
+  { label: 'Heading 3', style: 'header-three', tag: 'h3' },
+  { label: 'Heading 4', style: 'header-four', tag: 'h4' },
+  { label: 'Heading 5', style: 'header-five', tag: 'h5' },
+  { label: 'paragraph', style: 'p', tag: 'p' },
+]
+
 const BLOCK_TYPES = [
-  { label: 'H1', style: 'header-one' },
-  { label: 'H2', style: 'header-two' },
-  { label: 'H3', style: 'header-three' },
-  { label: 'H4', style: 'header-four' },
-  { label: 'H5', style: 'header-five' },
-  { label: 'H6', style: 'header-six' },
-  { label: 'Blockquote', style: 'blockquote' },
-  { label: 'UL', style: 'unordered-list-item' },
-  { label: 'OL', style: 'ordered-list-item' },
-  { label: 'Code Block', style: 'code-block' },
-  { label: 'Page Link', style: 'page-link' },
+  { label: 'blockquote', style: 'blockquote' },
+  { label: 'unorderedList', style: 'unordered-list-item' },
+  { label: 'orderedList', style: 'ordered-list-item' },
+  { label: 'code', style: 'code-block' },
 ]
 
 const INLINE_STYLES = [
-  { label: 'Bold', style: 'BOLD' },
-  { label: 'Italic', style: 'ITALIC' },
-  { label: 'Underline', style: 'UNDERLINE' },
-  { label: 'Monospace', style: 'CODE' },
+  { label: 'bold', style: 'BOLD' },
+  { label: 'italic', style: 'ITALIC' },
+  { label: 'underline', style: 'UNDERLINE' },
 ]
 
-const StyleButton = (props) => {
+const StyleIconButton = (props) => {
   const onToggle = () => {
     props.onToggle(props.style)
   }
@@ -32,9 +46,14 @@ const StyleButton = (props) => {
   const color = props.active ? 'green.200' : 'ghost'
 
   return (
-    <Button bg={color} onMouseDown={onToggle}>
-      {props.label}
-    </Button>
+    <IconButton
+      icon={props.icon}
+      bg={color}
+      size="md"
+      onMouseDown={onToggle}
+      fontSize="1.5em"
+      mr="2"
+    />
   )
 }
 
@@ -48,6 +67,11 @@ export default function ContentBlockControls(props) {
     .getType()
   const currentStyle = editorState.getCurrentInlineStyle()
 
+  const currentBlockType = RichUtils.getCurrentBlockType(editorState)
+  const currentTextStyle =
+    TEXT_TYPES.find((type) => type.style === currentBlockType)?.label ||
+    'paragraph'
+
   const handleAddPageLink = (page) => {
     const { updatedEditorState, entityKey } = addPageLink(editorState, page)
     const selection = updatedEditorState.getSelection()
@@ -56,29 +80,47 @@ export default function ContentBlockControls(props) {
 
   return (
     <Box className="RichEditor-controls">
-      <Box>
-        {BLOCK_TYPES.map((type) => (
-          <StyleButton
-            key={type.label}
-            active={type.style === blockType}
-            label={type.label}
-            onToggle={onToggle}
-            style={type.style}
-          />
-        ))}
-      </Box>
-      <Box>
+      <Flex>
+        <Menu>
+          <MenuButton as={Button} rightIcon="chevron-down">
+            {currentTextStyle}
+          </MenuButton>
+          <MenuList bg="white">
+            {TEXT_TYPES.map((type) => {
+              return (
+                <MenuItem key={type.label} onClick={() => onToggle(type.style)}>
+                  <Text as={type.tag}>{type.label}</Text>
+                </MenuItem>
+              )
+            })}
+          </MenuList>
+        </Menu>
+
+        <Divider orientation="vertical" my="2" color="gray.500" />
+
         {INLINE_STYLES.map((type) => (
-          <StyleButton
+          <StyleIconButton
             key={type.label}
             active={currentStyle.has(type.style)}
-            label={type.label}
+            icon={type.label}
             onToggle={onToggleStyles}
             style={type.style}
           />
         ))}
+
+        <Divider orientation="vertical" my="2" color="gray.500" />
+
+        {BLOCK_TYPES.map((type) => (
+          <StyleIconButton
+            key={type.label}
+            active={type.style === blockType}
+            icon={type.label}
+            onToggle={onToggle}
+            style={type.style}
+          />
+        ))}
         <IconButton icon="link" onClick={onOpen} />
-      </Box>
+      </Flex>
 
       <PageFinder
         isOpen={isOpen}
