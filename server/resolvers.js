@@ -71,7 +71,7 @@ const resolvers = {
         `)
         return query._result
       } catch (e) {
-        console.log('ERROR', e)
+        console.log(e)
       }
     },
     page: async (parent, args, context, info) => {
@@ -224,7 +224,7 @@ const resolvers = {
 
         return edges
       } catch (e) {
-        console.log('ERROR', e)
+        console.log(e)
       }
     },
   },

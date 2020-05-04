@@ -92,12 +92,10 @@ export default function ContentBlock({ page }) {
   const editorRef = React.useRef(null)
 
   const handleChange = (state) => {
-    console.log('change')
     setEditorState(state)
   }
 
   const handleToggle = (blockType) => {
-    console.log(blockType)
     setEditorState(RichUtils.toggleBlockType(editorState, blockType))
   }
 

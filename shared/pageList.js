@@ -50,11 +50,9 @@ export default function PageList() {
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-      console.log(data)
       if (data?.pageAdded) {
         const d = client.readQuery({ query })
         d.pages.push(data.pageAdded)
-        console.log(d)
         client.writeQuery({ query, data: d })
       }
     },

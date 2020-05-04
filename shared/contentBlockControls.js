@@ -103,7 +103,9 @@ export default function ContentBlockControls(props) {
             {TEXT_TYPES.map((type) => {
               return (
                 <MenuItem key={type.label} onClick={() => onToggle(type.style)}>
-                  <Text as={type.tag}>{type.label}</Text>
+                  <Text as={type.tag} mt="0">
+                    {type.label}
+                  </Text>
                 </MenuItem>
               )
             })}
