@@ -41,7 +41,7 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
         <ModalCloseButton />
         <ModalBody>
           <Box display="flex" flexDir="column" alignItems="flex-start" mb="4">
-            <CreatePageAction />
+            <CreatePageAction buttonColor="green" />
 
             {pages.map((page) => {
               return (

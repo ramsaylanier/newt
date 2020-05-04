@@ -4,7 +4,6 @@ import {
   PopoverTrigger,
   PopoverContent,
   PopoverArrow,
-  PopoverCloseButton,
   PopoverBody,
   Link,
 } from '@chakra-ui/core'
@@ -21,7 +20,6 @@ export default function ContentBlockHttpLink(props) {
       </PopoverTrigger>
       <PopoverContent zIndex={4} bg="white">
         <PopoverArrow />
-        <PopoverCloseButton />
         <PopoverBody>
           <Link href={entity.data.url} isExternal>
             {entity.data.url}

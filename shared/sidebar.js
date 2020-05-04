@@ -20,7 +20,7 @@ export default function Sidebar() {
       p="4"
       maxW={250}
     >
-      <CreatePageAction onCreate={onCreatePage} />
+      <CreatePageAction onCreate={onCreatePage} buttonColor="green" />
       <PageList />
     </Box>
   )

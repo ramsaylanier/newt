@@ -59,13 +59,15 @@ const Page = () => {
           <Box p={4}>
             <Box mb="6">
               <PageTitle title={page.title} />
-              <ContentBlock page={page} />
+              <ContentBlock page={page} key={page._id} />
             </Box>
 
             <Divider color="gray.400" />
 
             <Box mt="6">
-              <Text fontSize="xl">Mentioned In</Text>
+              <Text fontSize="xl">
+                {toLinks.length ? 'Mentioned In' : 'Not mentioned anywhere'}
+              </Text>
               {toLinks.map((link) => {
                 return <PageLink key={link._key} link={link} />
               })}

@@ -2,18 +2,23 @@ import React from 'react'
 import gql from 'graphql-tag'
 import { useRouter } from 'next/router'
 import { useMutation } from '@apollo/react-hooks'
-import { Box, Button } from '@chakra-ui/core'
+import { Box } from '@chakra-ui/core'
 import {
   Editor,
   EditorState,
   RichUtils,
+  KeyBindingUtil,
   CompositeDecorator,
   convertToRaw,
   convertFromRaw,
+  getDefaultKeyBinding,
 } from 'draft-js'
 import ContentBlockControls from './contentBlockControls'
 import ContentBlockPageLink from './contentBlockPageLink'
 import ContentBlockHttpLink from './contentBlockHttpLink'
+import debounce from 'lodash/debounce'
+
+const { hasCommandModifier } = KeyBindingUtil
 
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -79,7 +84,9 @@ export default function ContentBlock({ page }) {
   const [editorState, setEditorState] = React.useState(
     EditorState.createEmpty(decorator)
   )
+  const editorRef = React.useRef(null)
 
+  // hydrate editor state from store
   React.useEffect(() => {
     if (page?.content) {
       const content = convertFromRaw(page.content)
@@ -87,12 +94,18 @@ export default function ContentBlock({ page }) {
     } else {
       setEditorState(EditorState.createEmpty(decorator))
     }
-  }, [page])
+  }, [])
 
-  const editorRef = React.useRef(null)
+  const delayedSave = React.useRef(
+    debounce((editorState) => {
+      const content = convertToRaw(editorState.getCurrentContent())
+      updatePageContent({ variables: { id: _key, content } })
+    }, 1000)
+  ).current
 
   const handleChange = (state) => {
     setEditorState(state)
+    delayedSave(editorState)
   }
 
   const handleToggle = (blockType) => {
@@ -103,9 +116,15 @@ export default function ContentBlock({ page }) {
     setEditorState(RichUtils.toggleInlineStyle(editorState, inlineStyle))
   }
 
-  const handleSave = () => {
-    const content = convertToRaw(editorState.getCurrentContent())
-    updatePageContent({ variables: { id: _key, content } })
+  const keyBindingFn = (e) => {
+    return getDefaultKeyBinding(e)
+  }
+
+  const handleKeyCommand = (command) => {
+    const updatedEditorState = RichUtils.handleKeyCommand(editorState, command)
+    if (updatedEditorState) {
+      handleChange(updatedEditorState)
+    }
   }
 
   return (
@@ -122,19 +141,17 @@ export default function ContentBlock({ page }) {
       <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
         <Editor
           ref={editorRef}
+          keyBindingFn={keyBindingFn}
+          handleKeyCommand={handleKeyCommand}
           editorState={editorState}
           onChange={handleChange}
           placeholder="Enter some content..."
           spellCheck={true}
         />
       </Box>
-      <Button mt="4" variantColor="green" size="lg" onClick={handleSave}>
-        Save
-      </Button>
-
       <style global jsx>{`
         html {
-          font-size: 100%;
+          font-size: 90%;
         } /*16px*/
 
         body {
@@ -182,10 +199,6 @@ export default function ContentBlock({ page }) {
         small,
         .text_small {
           font-size: 0.833em;
-        }
-
-        a {
-          text-decoration: underline;
         }
       `}</style>
     </Box>
