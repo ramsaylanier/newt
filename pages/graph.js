@@ -14,10 +14,10 @@ console.log(theme)
 
 let simulation, node, nodeMenu, link, label, activeNode
 
-const NODE_SIZE = 10
-const DISTANCE = NODE_SIZE * 20
+const NODE_SIZE = 15
+const COLLISION_FACTOR = 5
 const LABEL_SIZE = 12
-const LINK_DISTANCE = 50
+const LINK_DISTANCE = 20
 
 const query = gql`
   query Graph($name: String!) {
@@ -98,7 +98,7 @@ export default function Graph() {
 
     simulation = forceSimulation()
       .velocityDecay(0.9)
-      .force('collision', forceCollide().radius(DISTANCE * 2))
+      .force('collision', forceCollide().radius(NODE_SIZE * COLLISION_FACTOR))
 
     return () => {
       simulation.stop()
@@ -176,7 +176,6 @@ export default function Graph() {
   }
 
   function handleClick(selection) {
-    console.log(selection)
     activeNode = selection.id
   }
 
@@ -188,7 +187,7 @@ export default function Graph() {
 
   function handleDrag() {
     function dragstarted(d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart()
+      if (!event.active) simulation.alphaTarget(0.01).restart()
       d.fx = d.x
       d.fy = d.y
       // d.fixed = true
@@ -240,7 +239,7 @@ export default function Graph() {
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
-      .attr('stroke', (d) => theme.colors.blackAlpha[400])
+      .attr('stroke', () => theme.colors.blackAlpha[400])
 
     if (activeNode) {
       const activeGraphNode = nodes.find((n) => n.id === activeNode)
@@ -295,12 +294,15 @@ export default function Graph() {
       'link',
       forceLink()
         .id((d) => d.id)
-        .distance(LINK_DISTANCE * 3)
+        .distance(LINK_DISTANCE * COLLISION_FACTOR)
     )
-    simulation.force('collision', forceCollide().radius(NODE_SIZE * 3))
+    simulation.force(
+      'collision',
+      forceCollide().radius(NODE_SIZE * COLLISION_FACTOR)
+    )
     simulation.nodes(nodes).on('tick', tick)
     simulation.force('link').links(links)
-    simulation.alpha(0.1).restart()
+    simulation.alpha(0.9).restart()
   }
   return (
     <div className="container">

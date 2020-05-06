@@ -12,10 +12,12 @@ import {
   convertFromRaw,
   getDefaultKeyBinding,
 } from 'draft-js'
+import { addPageLink } from '../utils/draftUtil'
 import ContentBlockControls from './contentBlockControls'
 import ContentBlockPageLink from './contentBlockPageLink'
 import ContentBlockHttpLink from './contentBlockHttpLink'
 import debounce from 'lodash/debounce'
+import { useDrop } from 'react-dnd'
 
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -83,6 +85,25 @@ export default function ContentBlock({ page }) {
   )
   const editorRef = React.useRef(null)
 
+  const [{ dropResult }, drop] = useDrop({
+    accept: 'Page',
+    drop: (item) => item,
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+      dropResult: monitor.getDropResult(),
+    }),
+  })
+
+  React.useEffect(() => {
+    if (dropResult) {
+      const { page } = dropResult
+      const { updatedEditorState, entityKey } = addPageLink(editorState, page)
+      const selection = updatedEditorState.getSelection()
+      setEditorState(updatedEditorState, selection, entityKey)
+    }
+  }, [dropResult])
+
   // hydrate editor state from store
   React.useEffect(() => {
     if (page?.content) {
@@ -125,7 +146,7 @@ export default function ContentBlock({ page }) {
   }
 
   return (
-    <Box fontSize=".9rem">
+    <Box fontSize=".9rem" ref={drop}>
       <Box bg="gray.100" position="relative" zIndex="2">
         <ContentBlockControls
           editorState={editorState}

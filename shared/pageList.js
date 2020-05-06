@@ -1,17 +1,14 @@
 import React from 'react'
 import gql from 'graphql-tag'
-import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks'
-import RouteLink from 'next/link'
+import { useQuery, useSubscription } from '@apollo/react-hooks'
 import {
   Input,
   InputGroup,
   InputLeftElement,
   List,
-  ListItem,
-  Button,
-  Link,
   Icon,
 } from '@chakra-ui/core'
+import PageListItem from './pageListItem'
 
 export const query = gql`
   query AllPages($filters: [FilterInput]) {
@@ -36,16 +33,6 @@ const addedSubscription = gql`
 const deletedSubscription = gql`
   subscription onPageDeleted {
     pageDeleted {
-      _id
-      _key
-      title
-    }
-  }
-`
-
-const deleteMutation = gql`
-  mutation DeletePage($id: String!) {
-    deletePage(id: $id) {
       _id
       _key
       title
@@ -80,13 +67,7 @@ export default function PageList() {
     },
   })
 
-  const [deletePage] = useMutation(deleteMutation)
-
   const pages = data?.pages || []
-
-  const handleDelete = (page) => {
-    deletePage({ variables: { id: page._id } })
-  }
 
   const handleChange = (e) => {
     setValue(e.target.value)
@@ -101,29 +82,7 @@ export default function PageList() {
         <Input variant="outlined" value={value} onChange={handleChange} />
       </InputGroup>
       {pages.map((page) => {
-        return (
-          <ListItem
-            key={page._key}
-            p="2"
-            mb="1"
-            mr="0"
-            backgroundColor="green.400"
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            overflow="hidden"
-            whiteSpace="nowrap"
-          >
-            <RouteLink href={'[_key]'} as={page._key}>
-              <Link overflow="hidden" textOverflow="ellipsis" flex="1">
-                {page.title}
-              </Link>
-            </RouteLink>
-            <Button size="xs" onClick={() => handleDelete(page)}>
-              <Icon name="delete" size="12px" />
-            </Button>
-          </ListItem>
-        )
+        return <PageListItem page={page} />
       })}
     </List>
   )
