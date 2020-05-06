@@ -37,6 +37,8 @@
     "next": "9.3.5",
     "node-fetch": "^2.6.0",
     "react": "16.13.1",
+    "react-dnd": "^10.0.2",
+    "react-dnd-html5-backend": "^10.0.2",
     "react-dom": "16.13.1",
     "react-draft-wysiwyg": "^1.14.5",
     "reset.css": "^2.0.2",

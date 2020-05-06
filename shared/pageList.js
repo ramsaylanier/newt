@@ -63,9 +63,9 @@ export default function PageList() {
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageAdded) {
-        const d = client.readQuery({ query })
+        const d = client.readQuery({ query, variables: { filters } })
         d.pages.push(data.pageAdded)
-        client.writeQuery({ query, data: d })
+        client.writeQuery({ query, variables: { filters }, data: d })
       }
     },
   })
@@ -73,9 +73,9 @@ export default function PageList() {
   useSubscription(deletedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageDeleted) {
-        const d = client.readQuery({ query })
+        const d = client.readQuery({ query, variables: { filters } })
         d.pages = d.pages.filter((p) => p._id !== data.pageDeleted._id)
-        client.writeQuery({ query, data: d })
+        client.writeQuery({ query, variables: { filters }, data: d })
       }
     },
   })
