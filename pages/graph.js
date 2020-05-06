@@ -8,8 +8,11 @@ import { drag } from 'd3-drag'
 import { forceSimulation, forceLink, forceCollide } from 'd3-force'
 import { select, event } from 'd3-selection'
 import { zoom, zoomIdentity } from 'd3-zoom'
+import theme from '../theme'
 
-let simulation, node, link, label
+console.log(theme)
+
+let simulation, node, nodeMenu, link, label, activeNode
 
 const NODE_SIZE = 10
 const DISTANCE = NODE_SIZE * 20
@@ -83,6 +86,11 @@ export default function Graph() {
       .attr('class', 'labels')
       .selectAll('.label')
 
+    nodeMenu = select(zoomRef.current)
+      .append('circle')
+      .attr('class', 'menu')
+      .attr('r', 20)
+
     node = select(zoomRef.current)
       .append('g')
       .attr('class', 'nodes')
@@ -97,6 +105,18 @@ export default function Graph() {
     }
   }, [])
 
+  // set initial offset
+  React.useEffect(() => {
+    let height = rootRef.current.offsetHeight || 0
+    let width = rootRef.current.offsetWidth || 0
+
+    setOffset({
+      x: width / 2,
+      y: height / 2,
+      k: 1,
+    })
+  }, [rootRef.current])
+
   // handle render
   React.useEffect(() => {
     if (nodes.length) {
@@ -106,7 +126,11 @@ export default function Graph() {
 
   // handle node events
   React.useEffect(() => {
-    node = select('.nodes').selectAll('.node').on('.drag', null)
+    node = select('.nodes')
+      .selectAll('.node')
+      .on('click', handleClick)
+      .on('dblclick', handleDoubleClick)
+      .on('.drag', null)
     node.call(handleDrag())
 
     select(svgRef.current).call(handleZoom()).on('dblclick.zoom', null)
@@ -124,7 +148,6 @@ export default function Graph() {
 
   React.useEffect(() => {
     if (svgRef.current && svgRef.current.width) {
-      console.log(offset)
       const t = zoomIdentity.translate(offset.x, offset.y).scale(offset.k)
       select(svgRef.current).call(handleZoom(true).transform, t)
       simulation.alphaTarget(0).restart()
@@ -152,12 +175,23 @@ export default function Graph() {
     return zoom().on('start', null).on('end', null).on('zoom', null)
   }
 
+  function handleClick(selection) {
+    console.log(selection)
+    activeNode = selection.id
+  }
+
+  function handleDoubleClick(selection) {
+    selection.fixed = false
+    delete selection.fx
+    delete selection.fy
+  }
+
   function handleDrag() {
     function dragstarted(d) {
       if (!event.active) simulation.alphaTarget(0.3).restart()
       d.fx = d.x
       d.fy = d.y
-      d.fixed = true
+      // d.fixed = true
     }
 
     function dragged(d) {
@@ -166,6 +200,8 @@ export default function Graph() {
     }
 
     function dragended(d) {
+      delete d.fx
+      delete d.fy
       if (!event.active) simulation.alphaTarget(0).restart()
     }
 
@@ -186,10 +222,16 @@ export default function Graph() {
     node
       .attr('cx', (d) => d.x)
       .attr('cy', (d) => d.y)
-      .attr('stroke', (d) => 'black')
+      .attr('stroke', (d) => {
+        return d.fixed ? theme.colors.green[400] : theme.colors.green[200]
+      })
+      .attr('fill', (d) => {
+        return d.id === activeNode
+          ? theme.colors.green[400]
+          : theme.colors.green[200]
+      })
       .attr('r', NODE_SIZE)
       .classed('selected', (d) => d.selected)
-      .classed('fixed', (d) => d.fixed)
       .classed('emphasis', (d) => d.emphasis)
       .classed('deemphasis', (d) => d.emphasis === false)
 
@@ -198,7 +240,14 @@ export default function Graph() {
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
-      .attr('stroke', (d) => 'black')
+      .attr('stroke', (d) => theme.colors.blackAlpha[400])
+
+    if (activeNode) {
+      const activeGraphNode = nodes.find((n) => n.id === activeNode)
+      nodeMenu
+        .attr('cx', () => activeGraphNode.x)
+        .attr('cy', () => activeGraphNode.y)
+    }
   }
 
   function render() {
@@ -212,7 +261,6 @@ export default function Graph() {
       .text((d) => d.title)
       .attr('text-anchor', 'middle')
       .attr('font-size', LABEL_SIZE)
-      .attr('stroke', '#000')
       .attr('fill', 'black')
       .attr('stroke-width', 0.5)
       .merge(label)
@@ -225,9 +273,8 @@ export default function Graph() {
       .append('circle')
       .classed('node', true)
       .attr('r', NODE_SIZE)
-      .attr('stroke', 'black')
-      .attr('stroke-width', 4)
-      .attr('fill', '#fff')
+      .attr('stroke-width', 3)
+      .attr('fill', theme.colors.green[200])
       .attr('cursor', 'pointer')
       .merge(node)
 
@@ -240,7 +287,6 @@ export default function Graph() {
       .enter()
       .append('line')
       .classed('link', true)
-      .attr('stroke', 'black')
       .attr('stroke-width', 2)
       .attr('cursor', 'help')
       .merge(link)

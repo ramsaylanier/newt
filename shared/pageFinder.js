@@ -18,7 +18,7 @@ import { query } from './pageList'
 export default function PageFinder({ isOpen, onClose, onSave }) {
   const router = useRouter()
   const { _key } = router.query
-  const filters = {}
+  const filters = []
   const skip = !isOpen
 
   const { data } = useQuery(query, {

@@ -2,11 +2,20 @@ import React from 'react'
 import gql from 'graphql-tag'
 import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks'
 import RouteLink from 'next/link'
-import { List, ListItem, Button, Link, Icon } from '@chakra-ui/core'
+import {
+  Input,
+  InputGroup,
+  InputLeftElement,
+  List,
+  ListItem,
+  Button,
+  Link,
+  Icon,
+} from '@chakra-ui/core'
 
 export const query = gql`
-  query AllPages {
-    pages {
+  query AllPages($filters: [FilterInput]) {
+    pages(filters: $filters) {
       _id
       _key
       title
@@ -45,7 +54,10 @@ const deleteMutation = gql`
 `
 
 export default function PageList() {
-  const filters = {}
+  const [value, setValue] = React.useState('')
+  const filters = value
+    ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
+    : []
   const { data } = useQuery(query, { variables: { filters } })
 
   useSubscription(addedSubscription, {
@@ -76,21 +88,31 @@ export default function PageList() {
     deletePage({ variables: { id: page._id } })
   }
 
+  const handleChange = (e) => {
+    setValue(e.target.value)
+  }
+
   return (
     <List>
+      <InputGroup mb="2">
+        <InputLeftElement>
+          <Icon name="search" />
+        </InputLeftElement>
+        <Input variant="outlined" value={value} onChange={handleChange} />
+      </InputGroup>
       {pages.map((page) => {
         return (
           <ListItem
             key={page._key}
             p="2"
             mb="1"
+            mr="0"
             backgroundColor="green.400"
             display="flex"
             justifyContent="space-between"
             alignItems="center"
             overflow="hidden"
             whiteSpace="nowrap"
-            maxWidth={200}
           >
             <RouteLink href={'[_key]'} as={page._key}>
               <Link overflow="hidden" textOverflow="ellipsis" flex="1">

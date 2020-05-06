@@ -66,19 +66,21 @@ const resolvers = {
   },
   Query: {
     pages: async (parent, args, context, info) => {
-      const collection = db.collection('Pages')
+      const collection = db.collection('pageSearch')
       const filters = args.filters || []
-      let filter = 'FILTER '
-
-      filters.forEach((filter) => {
-        const isLast = index === filters.length
+      let filter = ''
+      filters.forEach((f) => {
+        filter += `FILTER ${f.filter}`
       })
+      console.log(filter)
+      filter = aql.literal(filter)
       try {
         const query = await db.query(aql`
-          FOR p IN ${collection}
-          RETURN p
+          FOR page IN ${collection}
+          ${filter}
+          RETURN page
         `)
-        return query._result
+        return query._result || []
       } catch (e) {
         console.log(e)
       }

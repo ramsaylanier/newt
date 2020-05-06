@@ -9,6 +9,10 @@ body {
   color: #333;
 }
 
+input {
+  border: 0;
+}
+
 p {
   margin-bottom: 1.15rem;
 }

@@ -4,7 +4,7 @@ const typeDefs = gql`
   scalar GenericScalar
 
   input FilterInput {
-    fiter: String!
+    filter: String!
   }
 
   type Page {

@@ -2079,18 +2079,16 @@ aproba@^1.1.1:
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-1.2.0.tgz#6802e6264efd18c790a1b0d517f0f2627bf2c94a"
   integrity sha512-Y9J6ZjXtoYh8RnXVCMOU/ttDmk1aBjunq9vO0ta5x85WDQiQfUF9sIPBITdbiiIVcBo03Hi3jMxigBtsddlXRw==
 
-arangojs@5:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/arangojs/-/arangojs-5.8.0.tgz#5a84214209ea2cb9d2d25415213c2add28335ba8"
-  integrity sha512-x0uu3grt4K4MFcwjrS9l7Px0zhGHE2CywgsBy4CepUW1X3DNYLdH5foOC1MOHhqkvUOnkY8zXklGerorn65Bvw==
+arangojs@6:
+  version "6.14.1"
+  resolved "https://registry.yarnpkg.com/arangojs/-/arangojs-6.14.1.tgz#49f0911a35313ad27c3a34b39df0649373f8c1cd"
+  integrity sha512-TJfqwLCo4RyXH5j3i491xKc6qBUsOhd3aIwrTMTuhMkzT6pGRYLvemrmM+XG5HlwYS33M0Ppdj3V6YBsk0HYYg==
   dependencies:
+    "@types/node" "*"
     es6-error "^4.0.1"
-    http-errors "^1.6.1"
-    linkedlist "^1.0.1"
     multi-part "^2.0.0"
-    retry "^0.10.0"
-    utf8-length "^0.0.1"
-    xhr "^2.3.1"
+    x3-linkedlist "1.0.0"
+    xhr "^2.4.1"
 
 arg@^1.0.0:
   version "1.0.1"
@@ -4481,7 +4479,7 @@ http-errors@1.7.2:
     statuses ">= 1.5.0 < 2"
     toidentifier "1.0.0"
 
-http-errors@^1.6.1, http-errors@^1.7.3, http-errors@~1.7.2:
+http-errors@^1.7.3, http-errors@~1.7.2:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/http-errors/-/http-errors-1.7.3.tgz#6c619e4f9c60308c38519498c14fbb10aacebb06"
   integrity sha512-ZTTX0MWrsQ2ZAhA1cejAwDLycFsd7I7nVtnkT3Ol0aqodaKW+0CTZDQ1uBv5whptCnc8e8HeRRJxRs0kmm/Qfw==
@@ -5009,11 +5007,6 @@ lines-and-columns@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/lines-and-columns/-/lines-and-columns-1.1.6.tgz#1c00c743b433cd0a4e80758f7b64a57440d9ff00"
   integrity sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
-
-linkedlist@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/linkedlist/-/linkedlist-1.0.1.tgz#7b74189bfad6e76367fb5a10f3c36913128b782b"
-  integrity sha1-e3QYm/rW52Nn+1oQ88NpExKLeCs=
 
 linkify-it@^2.2.0:
   version "2.2.0"
@@ -6728,11 +6721,6 @@ retry@0.12.0:
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.12.0.tgz#1b42a6266a21f07421d1b0b54b7dc167b01c013b"
   integrity sha1-G0KmJmoh8HQh0bC1S33BZ7AcATs=
 
-retry@^0.10.0:
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/retry/-/retry-0.10.1.tgz#e76388d217992c252750241d3d3956fed98d8ff4"
-  integrity sha1-52OI0heZLCUnUCQdPTlW/tmNj/Q=
-
 rework-visit@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/rework-visit/-/rework-visit-1.0.0.tgz#9945b2803f219e2f7aca00adb8bc9f640f842c9a"
@@ -7753,11 +7741,6 @@ use@^3.1.0:
   resolved "https://registry.yarnpkg.com/use/-/use-3.1.1.tgz#d50c8cac79a19fbc20f2911f56eb973f4e10070f"
   integrity sha512-cwESVXlO3url9YWlFW/TA9cshCEhtu7IKJ/p5soJ/gGpj7vbvFrAY/eIioQ6Dw23KjZhYgiIo8HOs1nQ2vr/oQ==
 
-utf8-length@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/utf8-length/-/utf8-length-0.0.1.tgz#d315c4bed529c977f18dd35c73d72628327d9ada"
-  integrity sha1-0xXEvtUpyXfxjdNcc9cmKDJ9mto=
-
 util-deprecate@~1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
@@ -7983,7 +7966,12 @@ ws@^6.0.0:
   dependencies:
     async-limiter "~1.0.0"
 
-xhr@^2.3.1:
+x3-linkedlist@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/x3-linkedlist/-/x3-linkedlist-1.0.0.tgz#f5a8c7e742cf3b31d7800e031ab15135387f85d3"
+  integrity sha512-8CwA4XCMtso4G6qJWCzqbWQ9YJjtRiD4rUHFJ77rlAXQUN38Ni9E84y4F9qt4ijxZhfpJVm9tRs8E2vdLC4ZqQ==
+
+xhr@^2.4.1:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/xhr/-/xhr-2.5.0.tgz#bed8d1676d5ca36108667692b74b316c496e49dd"
   integrity sha512-4nlO/14t3BNUZRXIXfXe+3N6w3s1KoxcJUUURctd64BLRe67E4gRwp4PjywtDY72fXpZ1y6Ch0VZQRY/gMPzzQ==
