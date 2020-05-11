@@ -25,8 +25,7 @@ const resolvers = {
     from: async (parent) => {
       const collection = db.collection('Pages')
       try {
-        const page = await getPage(`page._id == '${parent._from}'`)
-        return page
+        return getPage(`page._id == '${parent._from}'`)
       } catch (e) {
         console.log(e)
       }
@@ -209,14 +208,14 @@ const resolvers = {
               from: result.new._from,
               to: result.new._to,
             }
-            console.log('EDGE', edge)
+
             pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
           } catch (e) {
             console.log(e)
           }
         })
 
-        return newDocument
+        return collection.document(newDocument)
       } catch (e) {
         console.log(e)
       }

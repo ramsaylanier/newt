@@ -10,8 +10,6 @@ import { select, event } from 'd3-selection'
 import { zoom, zoomIdentity } from 'd3-zoom'
 import theme from '../theme'
 
-console.log(theme)
-
 let simulation, node, nodeMenu, link, label, activeNode
 
 const NODE_SIZE = 15

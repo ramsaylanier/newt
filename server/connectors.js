@@ -2,7 +2,7 @@ const db = require('./database')
 const { aql } = require('arangojs')
 
 const getPage = async (f) => {
-  const collection = db.collection('pageSearch')
+  const collection = db.collection('Pages')
   try {
     const filter = aql.literal(`FILTER ${f}`)
     const query = await db.query(aql`
@@ -20,7 +20,6 @@ const getGraph = async (graphName) => {
   const graph = await db.graph(graphName)
   const edges = await graph.edgeCollection('PageEdges').all()
   const nodes = await graph.vertexCollection('Pages').all()
-  console.log(nodes._result)
   return {
     name: graphName,
     edges: edges._result,

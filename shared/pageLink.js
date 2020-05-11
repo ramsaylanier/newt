@@ -5,7 +5,6 @@ import RouteLink from 'next/link'
 import { Box, Text, Link } from '@chakra-ui/core'
 
 export default function PageLink({ link }) {
-  console.log(link)
   const router = useRouter()
   const { _key } = router.query
 

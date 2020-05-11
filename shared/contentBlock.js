@@ -1,5 +1,4 @@
 import React from 'react'
-import gql from 'graphql-tag'
 import { useRouter } from 'next/router'
 import { useMutation } from '@apollo/react-hooks'
 import { Box } from '@chakra-ui/core'
@@ -20,6 +19,7 @@ import SuggestedPageLinks from './suggestedPageLinks'
 import debounce from 'lodash/debounce'
 import { useDrop } from 'react-dnd'
 import { getEntitiesFromText } from '../utils/adaptApi'
+import { updatePageMutation } from '../graphql/mutations'
 
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
@@ -54,36 +54,12 @@ const decorator = new CompositeDecorator([
   },
 ])
 
-const mutation = gql`
-  mutation UpdatePageContent($id: String!, $content: GenericScalar) {
-    updatePageContent(id: $id, content: $content) {
-      _id
-      _key
-      title
-      content
-      lastEdited
-      edges {
-        _id
-        _key
-        from {
-          _id
-          _key
-          title
-        }
-        to {
-          _id
-          _key
-          title
-        }
-      }
-    }
-  }
-`
-
 export default function ContentBlock({ page }) {
+  const plainTextRef = React.useRef(null)
   const router = useRouter()
   const { _key } = router.query
-  const [updatePageContent] = useMutation(mutation)
+  const [updatePageContent, { data }] = useMutation(updatePageMutation)
+  console.log(data)
 
   const [editorState, setEditorState] = React.useState(
     EditorState.createEmpty(decorator)
@@ -123,39 +99,42 @@ export default function ContentBlock({ page }) {
   }, [])
 
   const delayedSave = React.useRef(
-    debounce(async (editorState) => {
+    debounce(async (editorState, previousPlainText) => {
       let updatedContentState = editorState.getCurrentContent()
-      const content = convertToRaw(updatedContentState)
-      updatePageContent({
-        variables: { id: _key, content },
-      })
-      const blocks = updatedContentState.getBlockMap()
-      let entities = []
-      let promises = []
 
-      blocks.forEach((block) => {
-        const text = block.getText()
-        const response = getEntitiesFromText(text, block.getKey())
-        promises.push(response)
-      })
+      if (updatedContentState.getPlainText() !== previousPlainText) {
+        const content = convertToRaw(updatedContentState)
+        updatePageContent({
+          variables: { id: _key, content },
+        })
+        const blocks = updatedContentState.getBlockMap()
+        let entities = []
+        let promises = []
 
-      const results = await Promise.all(promises)
-      results.forEach((result) => {
-        const { blockKey, data } = result
-        if (data && data[0]) {
-          data[0].entities.forEach((e) => {
-            entities.push({ blockKey, entityData: e })
-          })
-        }
-      })
-      setSuggestedPageLinks(entities)
+        blocks.forEach((block) => {
+          const text = block.getText()
+          const response = getEntitiesFromText(text, block.getKey())
+          promises.push(response)
+        })
+
+        const results = await Promise.all(promises)
+        results.forEach((result) => {
+          const { blockKey, data } = result
+          if (data && data[0]) {
+            data[0].entities.forEach((e) => {
+              entities.push({ blockKey, entityData: e })
+            })
+          }
+        })
+        setSuggestedPageLinks(entities)
+      }
     }, 1000)
   ).current
 
   const handleChange = (state) => {
     setEditorState(state)
-    delayedSave(state)
-    // plainTextRef.current = state.getCurrentContent().getPlainText()
+    delayedSave(state, plainTextRef.current)
+    plainTextRef.current = state.getCurrentContent().getPlainText()
   }
 
   const handleToggle = (blockType) => {

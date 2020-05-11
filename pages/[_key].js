@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/react-hooks'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
-import { Box, Divider, Text } from '@chakra-ui/core'
+import { Box, Divider, Text, Flex, IconButton } from '@chakra-ui/core'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
 import ContentBlock from '../shared/contentBlock'
@@ -41,7 +41,7 @@ const Page = () => {
   const router = useRouter()
   const { _key } = router.query
   const skip = !_key
-  const { data, error } = useQuery(query, {
+  const { data, error, refetch } = useQuery(query, {
     variables: { filter: `page._id == 'Pages/${_key}'` },
     skip,
   })
@@ -49,13 +49,12 @@ const Page = () => {
   if (error) throw error
 
   const page = data?.page || null
-  console.log(page)
-  console.log(_key)
   const toLinks = page?.edges?.filter((edge) => edge?.to?._key === _key) || []
-  console.log(toLinks)
   const lastEdited = page?.lastEdited
     ? new Date(page.lastEdited).toLocaleString('en-GB')
     : ''
+
+  const handleRefetch = () => refetch()
 
   return (
     <div className="container">
@@ -68,7 +67,14 @@ const Page = () => {
         {page && (
           <Box p={4}>
             <Box mb="6">
-              <PageTitle title={page.title} />
+              <Flex
+                width="100%"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <PageTitle title={page.title} />
+                <IconButton icon="repeat" onClick={handleRefetch} />
+              </Flex>
               {lastEdited && (
                 <Text fontSize="sm">Last edited: {lastEdited}</Text>
               )}

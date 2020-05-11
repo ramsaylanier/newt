@@ -1,6 +1,7 @@
 import React from 'react'
 import { useRouter } from 'next/router'
 import {
+  Flex,
   Text,
   Input,
   InputGroup,
@@ -86,10 +87,12 @@ export default function PageTitle({ title }) {
           </InputGroup>
         </form>
       ) : (
-        <Text fontSize="3xl" mb="4">
-          {title}
-          <IconButton icon="edit" onClick={handleClick} />
-        </Text>
+        <Flex alignItems="center">
+          <Text fontSize="3xl" mb="0">
+            {title}
+            <IconButton icon="edit" onClick={handleClick} />
+          </Text>
+        </Flex>
       )}
     </React.Fragment>
   )

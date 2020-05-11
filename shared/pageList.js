@@ -93,16 +93,13 @@ export default function PageList() {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageEdgeAdded) {
         const filter = `page._id == 'Pages/${data.pageEdgeAdded.to._key}'`
-        console.log(filter)
         try {
           const result = client.readQuery({
             query: PageQuery,
             variables: { filter },
           })
-          console.log(result)
           if (result) {
             const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
-            console.log(newEdge)
             result.page.edges.push(newEdge)
             client.writeQuery({
               query: PageQuery,
@@ -113,41 +110,6 @@ export default function PageList() {
         } catch (e) {
           //
         }
-
-        // const fragment = gql`
-        //   fragment pageEdgeAdded on Page {
-        //     edges {
-        //       _id
-        //       _key
-        //       __typename
-        //       to {
-        //         _id
-        //         _key
-        //         title
-        //       }
-        //     }
-        //   }
-        // `
-
-        // console.log(data)
-
-        // const page = client.readFragment({
-        //   id: data?.pageEdgeAdded?.to._id,
-        //   fragment,
-        // })
-        // console.log(data)
-        // const newEdge = {
-        //   ...data.pageEdgeAdded,
-        //   __typename: 'PageEdge',
-        // }
-        // console.log(newEdge)
-        // client.writeFragment({
-        //   id: data?.pageEdgeAdded?.to._id,
-        //   fragment,
-        //   data: {
-        //     edges: [...page.edges, newEdge],
-        //   },
-        // })
       }
     },
   })
