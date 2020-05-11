@@ -23,14 +23,14 @@ export const addPageLink = (editorState, page) => {
   const contentWithNewText = Modifier.insertText(
     contentState,
     updatedSelectionState,
-    ` ${page.title} `
+    `${page.title}`
   )
 
   updatedSelectionState = new SelectionState({
     anchorKey: selection.anchorKey,
-    anchorOffset: selection.focusOffset + 1,
+    anchorOffset: selection.focusOffset,
     focusKey: selection.anchorKey,
-    focusOffset: selection.focusOffset + page.title.length + 1,
+    focusOffset: selection.focusOffset + page.title.length,
     isBackward: false,
   })
 

@@ -1,13 +1,14 @@
 const db = require('./database')
 const { aql } = require('arangojs')
 
-const getPage = async (pageId) => {
-  const collection = db.collection('Pages')
+const getPage = async (f) => {
+  const collection = db.collection('pageSearch')
   try {
+    const filter = aql.literal(`FILTER ${f}`)
     const query = await db.query(aql`
-          FOR p IN ${collection}
-          FILTER p._id == ${pageId}
-          RETURN p
+          FOR page IN ${collection}
+          ${filter}
+          RETURN page
         `)
     return query.next()
   } catch (e) {

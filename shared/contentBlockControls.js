@@ -137,6 +137,7 @@ export default function ContentBlockControls(props) {
         ))}
         <IconButton icon="link" onClick={onOpen} />
         <IconButton icon="http" fontSize="1.8rem" onClick={onHttpLinkOpen} />
+        <Button>Find Links</Button>
       </Flex>
 
       <PageFinder

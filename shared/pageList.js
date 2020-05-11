@@ -9,6 +9,7 @@ import {
   Icon,
 } from '@chakra-ui/core'
 import PageListItem from './pageListItem'
+import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
   query AllPages($filters: [FilterInput]) {
@@ -40,6 +41,27 @@ const deletedSubscription = gql`
   }
 `
 
+const pageEdgeAddedSubscription = gql`
+  subscription onPageEdgeAdded {
+    pageEdgeAdded {
+      _id
+      _key
+      from {
+        _id
+        _key
+        title
+      }
+      to {
+        _id
+        _key
+        title
+      }
+      blockKeys
+      excerpt
+    }
+  }
+`
+
 export default function PageList() {
   const [value, setValue] = React.useState('')
   const filters = value
@@ -67,6 +89,69 @@ export default function PageList() {
     },
   })
 
+  useSubscription(pageEdgeAddedSubscription, {
+    onSubscriptionData: ({ client, subscriptionData: { data } }) => {
+      if (data?.pageEdgeAdded) {
+        const filter = `page._id == 'Pages/${data.pageEdgeAdded.to._key}'`
+        console.log(filter)
+        try {
+          const result = client.readQuery({
+            query: PageQuery,
+            variables: { filter },
+          })
+          console.log(result)
+          if (result) {
+            const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
+            console.log(newEdge)
+            result.page.edges.push(newEdge)
+            client.writeQuery({
+              query: PageQuery,
+              varialbes: { filter },
+              data: result,
+            })
+          }
+        } catch (e) {
+          //
+        }
+
+        // const fragment = gql`
+        //   fragment pageEdgeAdded on Page {
+        //     edges {
+        //       _id
+        //       _key
+        //       __typename
+        //       to {
+        //         _id
+        //         _key
+        //         title
+        //       }
+        //     }
+        //   }
+        // `
+
+        // console.log(data)
+
+        // const page = client.readFragment({
+        //   id: data?.pageEdgeAdded?.to._id,
+        //   fragment,
+        // })
+        // console.log(data)
+        // const newEdge = {
+        //   ...data.pageEdgeAdded,
+        //   __typename: 'PageEdge',
+        // }
+        // console.log(newEdge)
+        // client.writeFragment({
+        //   id: data?.pageEdgeAdded?.to._id,
+        //   fragment,
+        //   data: {
+        //     edges: [...page.edges, newEdge],
+        //   },
+        // })
+      }
+    },
+  })
+
   const pages = data?.pages || []
 
   const handleChange = (e) => {
@@ -82,7 +167,7 @@ export default function PageList() {
         <Input variant="outlined" value={value} onChange={handleChange} />
       </InputGroup>
       {pages.map((page) => {
-        return <PageListItem page={page} />
+        return <PageListItem key={page._key} page={page} />
       })}
     </List>
   )

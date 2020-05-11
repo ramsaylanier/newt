@@ -9,14 +9,16 @@ import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
 import ContentBlock from '../shared/contentBlock'
 
-const query = gql`
-  query Page($id: String!) {
-    page(id: $id) {
+export const query = gql`
+  query Page($filter: String!) {
+    page(filter: $filter) {
       _id
       _key
       title
       content
+      lastEdited
       edges {
+        _id
         _key
         blockKeys
         excerpt
@@ -39,13 +41,21 @@ const Page = () => {
   const router = useRouter()
   const { _key } = router.query
   const skip = !_key
-  const { data } = useQuery(query, {
-    variables: { id: `Pages/${_key}` },
+  const { data, error } = useQuery(query, {
+    variables: { filter: `page._id == 'Pages/${_key}'` },
     skip,
   })
 
+  if (error) throw error
+
   const page = data?.page || null
+  console.log(page)
+  console.log(_key)
   const toLinks = page?.edges?.filter((edge) => edge?.to?._key === _key) || []
+  console.log(toLinks)
+  const lastEdited = page?.lastEdited
+    ? new Date(page.lastEdited).toLocaleString('en-GB')
+    : ''
 
   return (
     <div className="container">
@@ -59,6 +69,9 @@ const Page = () => {
           <Box p={4}>
             <Box mb="6">
               <PageTitle title={page.title} />
+              {lastEdited && (
+                <Text fontSize="sm">Last edited: {lastEdited}</Text>
+              )}
               <ContentBlock page={page} key={page._id} />
             </Box>
 

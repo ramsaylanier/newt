@@ -5,6 +5,7 @@ const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
 const { uuid } = require('uuidv4')
 const uniq = require('lodash/uniq')
+const forEach = require('lodash/forEach')
 
 const resolvers = {
   Page: {
@@ -24,7 +25,7 @@ const resolvers = {
     from: async (parent) => {
       const collection = db.collection('Pages')
       try {
-        const page = await getPage(parent._from)
+        const page = await getPage(`page._id == '${parent._from}'`)
         return page
       } catch (e) {
         console.log(e)
@@ -33,7 +34,7 @@ const resolvers = {
     to: async (parent) => {
       const collection = db.collection('Pages')
       try {
-        return getPage(parent._to)
+        return getPage(`page._id == '${parent._to}'`)
       } catch (e) {
         console.log(e)
       }
@@ -60,7 +61,6 @@ const resolvers = {
       return parent.nodes
     },
     edges: async (parent, args) => {
-      console.log(parent.edges)
       return parent.edges
     },
   },
@@ -72,12 +72,12 @@ const resolvers = {
       filters.forEach((f) => {
         filter += `FILTER ${f.filter}`
       })
-      console.log(filter)
       filter = aql.literal(filter)
       try {
         const query = await db.query(aql`
           FOR page IN ${collection}
           ${filter}
+          SORT page.lastEdited DESC
           RETURN page
         `)
         return query._result || []
@@ -86,7 +86,7 @@ const resolvers = {
       }
     },
     page: async (parent, args, context, info) => {
-      return getPage(args.id)
+      return getPage(args.filter)
     },
     graph: async (parent, args, context, info) => {
       return getGraph(args.name)
@@ -137,6 +137,7 @@ const resolvers = {
         const document = await collection.document(args.id)
         const update = await collection.update(document._key, {
           content: args.content,
+          lastEdited: new Date(),
         })
         const newDocument = await collection.document(update)
         pubSub.publish('pageUpdated', { pageUpdated: newDocument })
@@ -191,12 +192,28 @@ const resolvers = {
           }
         })
 
-        linksFromContent.forEach((link) => {
-          edgeCollection.save({
-            _from: `Pages/${args.id}`,
-            _to: `Pages/${link.pageKey}`,
-            blockKeys: link.blockKeys,
-          })
+        // using forEach from lodash because I'm lazy
+        // and didn't want to setup multiple Promise.all() for other subscriptions
+        forEach(linksFromContent, async (link) => {
+          try {
+            const result = await edgeCollection.save(
+              {
+                _from: `Pages/${args.id}`,
+                _to: `Pages/${link.pageKey}`,
+                blockKeys: link.blockKeys,
+              },
+              { returnNew: true }
+            )
+            const edge = {
+              ...result.new,
+              from: result.new._from,
+              to: result.new._to,
+            }
+            console.log('EDGE', edge)
+            pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
+          } catch (e) {
+            console.log(e)
+          }
         })
 
         return newDocument
@@ -248,6 +265,9 @@ const resolvers = {
     },
     pageDeleted: {
       subscribe: () => pubSub.asyncIterator(['pageDeleted']),
+    },
+    pageEdgeAdded: {
+      subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
     },
   },
 }

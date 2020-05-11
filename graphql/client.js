@@ -1,5 +1,5 @@
 import { ApolloClient } from 'apollo-client'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import { InMemoryCache, defaultDataIdFromObject } from 'apollo-cache-inmemory'
 import { HttpLink } from 'apollo-link-http'
 import { onError } from 'apollo-link-error'
 import { ApolloLink, split } from 'apollo-link'
@@ -50,7 +50,18 @@ const client = new ApolloClient({
     }),
     link,
   ]),
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    addTypename: true,
+    dataIdFromObject: (object) => {
+      switch (object.__typename) {
+        case 'Page':
+        case 'PageEdge':
+          return object ? object._id : null // append `bar` to the `blah` field as the identifier
+        default:
+          return defaultDataIdFromObject(object) // fall back to default handling
+      }
+    },
+  }),
   ssrMode: process.browser ? false : true,
 })
 

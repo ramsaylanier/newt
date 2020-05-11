@@ -13,6 +13,7 @@ const typeDefs = gql`
     title: String
     edges: [PageEdge]
     content: GenericScalar
+    lastEdited: String
   }
 
   type PageEdge {
@@ -32,7 +33,7 @@ const typeDefs = gql`
 
   type Query {
     pages(filters: [FilterInput]): [Page]
-    page(id: String!): Page
+    page(filter: String!): Page
     graph(name: String!): Graph
   }
 
@@ -51,6 +52,7 @@ const typeDefs = gql`
   type Subscription {
     pageAdded: Page
     pageDeleted: Page
+    pageEdgeAdded: PageEdge
   }
 `
 

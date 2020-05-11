@@ -15,7 +15,7 @@ const deleteMutation = gql`
   }
 `
 export default function PageListItem({ page }) {
-  const [collectedProps, drag] = useDrag({
+  const [, drag] = useDrag({
     item: { page, type: 'Page' },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   })
@@ -23,8 +23,6 @@ export default function PageListItem({ page }) {
   const handleDelete = (page) => {
     deletePage({ variables: { id: page._id } })
   }
-
-  console.log(collectedProps)
 
   return (
     <ListItem
