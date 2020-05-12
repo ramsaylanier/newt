@@ -1,5 +1,5 @@
-const { Database, aql } = require('arangojs')
-const config = require('../config')
+const { Database } = require('arangojs')
+const config = require('./config')
 
 let db = new Database({
   url: config.database.host,
@@ -39,7 +39,7 @@ async function init() {
     const pageEdgeCollection = db.edgeCollection('PageEdges')
     const pageEdgeCollectionExists = await pageEdgeCollection.exists()
 
-    if (!pageCollectionExists) {
+    if (!pageEdgeCollectionExists) {
       pageEdgeCollection.create()
     }
 
@@ -50,7 +50,6 @@ async function init() {
       searchView.create()
     }
 
-    const data = await searchView.get()
     const viewProps = {
       links: {
         Pages: {
@@ -62,7 +61,7 @@ async function init() {
         },
       },
     }
-    const result = await searchView.setProperties(viewProps)
+    searchView.setProperties(viewProps)
   } catch (e) {
     console.log('ERRRROR', e)
   }
@@ -70,4 +69,4 @@ async function init() {
 
 init()
 
-module.exports = db
+export default db

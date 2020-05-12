@@ -25,7 +25,7 @@ const addMutation = gql`
   }
 `
 
-export default function CreatePageAction({ buttonColor, onCreate }) {
+const CreatePageAction = ({ buttonColor, onCreate }) => {
   const [title, setTitle] = React.useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [createPage, { data }] = useMutation(addMutation)
@@ -84,3 +84,5 @@ export default function CreatePageAction({ buttonColor, onCreate }) {
     </React.Fragment>
   )
 }
+
+export default CreatePageAction

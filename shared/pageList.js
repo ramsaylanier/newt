@@ -62,7 +62,7 @@ const pageEdgeAddedSubscription = gql`
   }
 `
 
-export default function PageList() {
+const PageList = () => {
   const [value, setValue] = React.useState('')
   const filters = value
     ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
@@ -77,6 +77,7 @@ export default function PageList() {
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
+      console.log(data)
       if (data?.pageAdded) {
         let { pages } = client.readQuery({ query, variables })
         pages = [data.pageAdded, ...pages]
@@ -141,3 +142,5 @@ export default function PageList() {
     </List>
   )
 }
+
+export default PageList
