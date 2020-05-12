@@ -7,7 +7,7 @@ import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from 'apollo-utilities'
 import fetch from 'node-fetch'
 
-const host = 'localhost:4000'
+const host = 'localhost:4000/graphql'
 
 const wsLink = process.browser
   ? new WebSocketLink({
