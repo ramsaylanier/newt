@@ -75,9 +75,7 @@ const Page = () => {
                 <PageTitle title={page.title} />
                 <IconButton icon="repeat" onClick={handleRefetch} />
               </Flex>
-              {lastEdited && (
-                <Text fontSize="sm">Last edited: {lastEdited}</Text>
-              )}
+              <Text fontSize="sm">Last edited: {lastEdited}</Text>
               <ContentBlock page={page} key={page._id} />
             </Box>
 

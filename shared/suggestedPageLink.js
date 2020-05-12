@@ -26,7 +26,11 @@ export default function SuggestedPageLink(props) {
     const existingEntity = block.getEntityAt(start_pos)
     if (!existingEntity) {
       if (!page) {
-        page = await createPage({ variables: { title: entity.text } })
+        const { data, error } = await createPage({
+          variables: { title: entity.text },
+        })
+        if (error) throw error
+        page = data.createPage
       }
 
       let updatedEditorState = EditorState.forceSelection(

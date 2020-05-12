@@ -91,8 +91,9 @@ export default function PageList() {
 
   useSubscription(pageEdgeAddedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-      if (data?.pageEdgeAdded) {
-        const filter = `page._id == 'Pages/${data.pageEdgeAdded.to._key}'`
+      const toKey = data?.pageEdgeAdded?.to?._key || null
+      if (toKey) {
+        const filter = `page._id == 'Pages/${toKey}'`
         try {
           const result = client.readQuery({
             query: PageQuery,
