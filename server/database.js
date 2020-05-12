@@ -1,8 +1,6 @@
 const { Database, aql } = require('arangojs')
 const config = require('../config')
 
-console.log(config)
-
 let db = new Database({
   url: config.database.host,
 })
