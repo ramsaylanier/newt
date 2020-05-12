@@ -12,8 +12,8 @@ import PageListItem from './pageListItem'
 import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
-  query AllPages($filters: [FilterInput]) {
-    pages(filters: $filters) {
+  query AllPages($filters: [FilterInput], $offset: Int, $count: Int) {
+    pages(filters: $filters, offset: $offset, count: $count) {
       _id
       _key
       title
@@ -67,12 +67,16 @@ export default function PageList() {
   const filters = value
     ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
     : []
-  const { data } = useQuery(query, { variables: { filters } })
+  const variables = { filters }
+
+  const { data } = useQuery(query, {
+    variables,
+  })
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageAdded) {
-        const d = client.readQuery({ query, variables: { filters } })
+        const d = client.readQuery({ query, variables })
         d.pages.push(data.pageAdded)
         client.writeQuery({ query, variables: { filters }, data: d })
       }
@@ -82,7 +86,7 @@ export default function PageList() {
   useSubscription(deletedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageDeleted) {
-        const d = client.readQuery({ query, variables: { filters } })
+        const d = client.readQuery({ query })
         d.pages = d.pages.filter((p) => p._id !== data.pageDeleted._id)
         client.writeQuery({ query, variables: { filters }, data: d })
       }
@@ -97,14 +101,14 @@ export default function PageList() {
         try {
           const result = client.readQuery({
             query: PageQuery,
-            variables: { filter },
+            variables,
           })
           if (result) {
             const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
             result.page.edges.push(newEdge)
             client.writeQuery({
               query: PageQuery,
-              varialbes: { filter },
+              variables: { ...variables, filter },
               data: result,
             })
           }

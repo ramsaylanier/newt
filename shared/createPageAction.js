@@ -20,6 +20,7 @@ const addMutation = gql`
       _id
       _key
       title
+      lastEdited
     }
   }
 `

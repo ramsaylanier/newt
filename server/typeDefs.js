@@ -32,7 +32,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    pages(filters: [FilterInput]): [Page]
+    pages(filters: [FilterInput], count: Int, offset: Int): [Page]
     page(filter: String!): Page
     graph(name: String!): Graph
   }

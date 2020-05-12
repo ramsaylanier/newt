@@ -65,18 +65,24 @@ const resolvers = {
   },
   Query: {
     pages: async (parent, args, context, info) => {
-      const collection = db.collection('pageSearch')
-      const filters = args.filters || []
       let filter = ''
+      let limit = ''
+      const collection = db.collection('pageSearch')
+      const { filters = [], count, offset = 0 } = args
       filters.forEach((f) => {
         filter += `FILTER ${f.filter}`
       })
       filter = aql.literal(filter)
+      if (count) {
+        limit = `LIMIT ${offset}, ${count}`
+      }
+      limit = aql.literal(limit)
       try {
         const query = await db.query(aql`
           FOR page IN ${collection}
           ${filter}
           SORT page.lastEdited DESC
+          ${limit}
           RETURN page
         `)
         return query._result || []
@@ -96,7 +102,10 @@ const resolvers = {
       const collection = db.collection('Pages')
 
       try {
-        const newPage = await collection.save({ title: args.title })
+        const newPage = await collection.save({
+          title: args.title,
+          lastEdited: new Date(),
+        })
         const document = collection.document(newPage)
         pubSub.publish('pageAdded', { pageAdded: document })
         return document
