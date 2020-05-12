@@ -7,9 +7,11 @@ import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from 'apollo-utilities'
 import fetch from 'node-fetch'
 
+const host = 'ec2-54-175-88-74.compute-1.amazonaws.com:4000/graphql'
+
 const wsLink = process.browser
   ? new WebSocketLink({
-      uri: `ws://localhost:4000/graphql`,
+      uri: `ws://${host}`,
       options: {
         reconnect: true,
       },
@@ -17,7 +19,7 @@ const wsLink = process.browser
   : null
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: `http://${host}`,
   credentials: 'same-origin',
   fetch,
 })
