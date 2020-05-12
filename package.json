@@ -4,12 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --ignore pages/ --ignore shared/ --ignore graphql/ --ignore ./theme.js server.js",
-    "start": "cross-env NODE_ENV=production node server.js",
     "lint": "eslint ./shared/** ./pages/** -c .eslintrc.json --fix --ext js,jsx",
     "dev-client": "next dev",
     "build": "next build",
-    "export": "next export",
-    "deploy": "yarn build && yarn export"
+    "start": "cross-env NODE_ENV=production next server.js"
   },
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
