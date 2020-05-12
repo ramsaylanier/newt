@@ -69,16 +69,18 @@ export default function PageList() {
     : []
   const variables = { filters }
 
-  const { data } = useQuery(query, {
+  const { data, error } = useQuery(query, {
     variables,
   })
+
+  if (error) throw error
 
   useSubscription(addedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageAdded) {
-        const d = client.readQuery({ query, variables })
-        d.pages.push(data.pageAdded)
-        client.writeQuery({ query, variables: { filters }, data: d })
+        let { pages } = client.readQuery({ query, variables })
+        pages = [data.pageAdded, ...pages]
+        client.writeQuery({ query, variables, data: { pages } })
       }
     },
   })
@@ -86,9 +88,9 @@ export default function PageList() {
   useSubscription(deletedSubscription, {
     onSubscriptionData: ({ client, subscriptionData: { data } }) => {
       if (data?.pageDeleted) {
-        const d = client.readQuery({ query })
-        d.pages = d.pages.filter((p) => p._id !== data.pageDeleted._id)
-        client.writeQuery({ query, variables: { filters }, data: d })
+        let { pages } = client.readQuery({ query, variables })
+        pages = pages.filter((p) => p._id !== data.pageDeleted._id)
+        client.writeQuery({ query, variables, data: { pages } })
       }
     },
   })
