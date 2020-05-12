@@ -67,19 +67,19 @@ const resolvers = {
     pages: async (parent, args, context, info) => {
       let filter = ''
       let limit = ''
-      const collection = db.collection('pageSearch')
-      const { filters = [], count, offset = 0 } = args
-      filters.forEach((f) => {
-        filter += `FILTER ${f.filter}`
-      })
-      filter = aql.literal(filter)
-      if (count) {
-        limit = `LIMIT ${offset}, ${count}`
-      }
-      limit = aql.literal(limit)
       try {
+        const collection = db.collection('pageSearch')
+        const { filters = [], count, offset = 0 } = args
+        filters.forEach((f) => {
+          filter += `FILTER ${f.filter}`
+        })
+        filter = aql.literal(filter)
+        if (count) {
+          limit = `LIMIT ${offset}, ${count}`
+        }
+        limit = aql.literal(limit)
         const query = await db.query(aql`
-          FOR page IN ${collection}
+          FOR page IN ${collection} 
           ${filter}
           SORT page.lastEdited DESC
           ${limit}
