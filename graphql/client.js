@@ -9,14 +9,14 @@ import fetch from 'node-fetch'
 
 const host = 'ec2-54-175-88-74.compute-1.amazonaws.com:4000/graphql'
 
-const wsLink = process.browser
-  ? new WebSocketLink({
-      uri: `ws://${host}`,
-      options: {
-        reconnect: true,
-      },
-    })
-  : null
+// const wsLink = process.browser
+//   ? new WebSocketLink({
+//       uri: `ws://${host}`,
+//       options: {
+//         reconnect: true,
+//       },
+//     })
+//   : null
 
 const httpLink = new HttpLink({
   uri: `http://${host}`,
@@ -34,7 +34,7 @@ const link = process.browser
           definition.operation === 'subscription'
         )
       },
-      wsLink,
+      httpLink,
       httpLink
     )
   : httpLink
