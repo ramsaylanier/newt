@@ -1,15 +1,13 @@
 const { PubSub } = require('graphql-subscriptions')
 const pubSub = new PubSub()
-const db = require('./database')
-const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
-const { uuid } = require('uuidv4')
 const uniq = require('lodash/uniq')
 const forEach = require('lodash/forEach')
 
+const { aql } = require('arangojs')
 const resolvers = {
   Page: {
-    edges: async (parent, args) => {
+    edges: async (parent, args, { db }) => {
       const collection = db.edgeCollection('PageEdges')
       try {
         const outEdges = await collection.outEdges(parent._id)
@@ -22,23 +20,21 @@ const resolvers = {
     },
   },
   PageEdge: {
-    from: async (parent) => {
-      const collection = db.collection('Pages')
+    from: async (parent, args, { db }) => {
       try {
-        return getPage(`page._id == '${parent._from}'`)
+        return getPage(`page._id == '${parent._from}'`, db)
       } catch (e) {
         console.log(e)
       }
     },
-    to: async (parent) => {
-      const collection = db.collection('Pages')
+    to: async (parent, args, { db }) => {
       try {
-        return getPage(`page._id == '${parent._to}'`)
+        return getPage(`page._id == '${parent._to}'`, db)
       } catch (e) {
         console.log(e)
       }
     },
-    excerpt: async (parent) => {
+    excerpt: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
       try {
         const query = await db.query(aql`
@@ -56,15 +52,16 @@ const resolvers = {
     },
   },
   Graph: {
-    nodes: async (parent, args) => {
+    nodes: async (parent) => {
       return parent.nodes
     },
-    edges: async (parent, args) => {
+    edges: async (parent) => {
       return parent.edges
     },
   },
   Query: {
-    pages: async (parent, args, context, info) => {
+    pages: async (parent, args, { db }) => {
+      console.log(db)
       let filter = ''
       let limit = ''
       try {
@@ -90,15 +87,15 @@ const resolvers = {
         console.log(e)
       }
     },
-    page: async (parent, args, context, info) => {
-      return getPage(args.filter)
+    page: async (parent, args, { db }) => {
+      return getPage(args.filter, db)
     },
-    graph: async (parent, args, context, info) => {
-      return getGraph(args.name)
+    graph: async (parent, args, { db }) => {
+      return getGraph(args.name, db)
     },
   },
   Mutation: {
-    createPage: async (parent, args, context, info) => {
+    createPage: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
 
       try {
@@ -113,7 +110,7 @@ const resolvers = {
         console.log(e)
       }
     },
-    deletePage: async (parent, args, context, info) => {
+    deletePage: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
       try {
         const document = await collection.document(args.id)
@@ -124,7 +121,7 @@ const resolvers = {
         console.log(e)
       }
     },
-    updatePageTitle: async (parent, args, context, info) => {
+    updatePageTitle: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
       try {
         const document = await collection.document(args.id)
@@ -138,7 +135,7 @@ const resolvers = {
         console.log(e)
       }
     },
-    updatePageContent: async (parent, args, context, info) => {
+    updatePageContent: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
       const edgeCollection = db.edgeCollection('PageEdges')
       try {
@@ -229,7 +226,7 @@ const resolvers = {
         console.log(e)
       }
     },
-    createPageEdge: async (parent, args, context, info) => {
+    createPageEdge: async (parent, args, { db }) => {
       const { source, target, blockKey } = args
       const collection = db.edgeCollection('PageEdges')
       try {

@@ -1,33 +1,26 @@
-const { Database, aql } = require('arangojs')
+const { Database } = require('arangojs')
 const config = require('../config')
 
-let db = new Database({
-  url: config.database.host,
-})
+const makeDb = async () => {
+  const db = new Database({
+    url: config.database.host,
+  })
 
-const useDatabase = () => {
-  db.useDatabase(config.database.name)
-  db.useBasicAuth('root', '')
-}
-
-const checkExists = async () => {
-  const exists = await db.exists()
-  if (!exists) {
-    db.useDatabase('_system')
-    const created = await db.createDatabase(config.database.name, [
-      { username: 'root' },
-    ])
-    if (created) {
-      useDatabase()
-      checkExists()
-    }
-  }
-}
-
-async function init() {
   try {
-    useDatabase()
-    checkExists()
+    const useDb = () => {
+      db.useDatabase(config.database.name)
+      db.useBasicAuth('root', '')
+    }
+
+    useDb()
+    const exists = await db.exists()
+
+    if (!exists) {
+      console.log('nope')
+      db.useDatabase('_system')
+      await db.createDatabase(config.database.name, [{ username: 'root' }])
+      useDb()
+    }
 
     const pageCollection = db.collection('Pages')
     const pageCollectionExists = await pageCollection.exists()
@@ -39,7 +32,7 @@ async function init() {
     const pageEdgeCollection = db.edgeCollection('PageEdges')
     const pageEdgeCollectionExists = await pageEdgeCollection.exists()
 
-    if (!pageCollectionExists) {
+    if (!pageEdgeCollectionExists) {
       pageEdgeCollection.create()
     }
 
@@ -50,7 +43,6 @@ async function init() {
       searchView.create()
     }
 
-    const data = await searchView.get()
     const viewProps = {
       links: {
         Pages: {
@@ -62,12 +54,12 @@ async function init() {
         },
       },
     }
-    const result = await searchView.setProperties(viewProps)
+    await searchView.setProperties(viewProps)
+
+    return db
   } catch (e) {
     console.log('ERRRROR', e)
   }
 }
 
-init()
-
-module.exports = db
+module.exports = makeDb

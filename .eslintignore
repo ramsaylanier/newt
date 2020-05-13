@@ -1,6 +1,6 @@
 node_modules/
-server/
-server.js
+# server/
+# server.js
 public/
 .next/
 *.css

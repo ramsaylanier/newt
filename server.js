@@ -1,18 +1,23 @@
 const express = require('express')
-const { ApolloServer, gql } = require('apollo-server-express')
+const { ApolloServer } = require('apollo-server-express')
 const { createServer } = require('http')
 const typeDefs = require('./server/typeDefs')
 const resolvers = require('./server/resolvers')
-const cors = require('cors')
+const makeDb = require('./server/database')
 
 const PORT = parseInt(process.env.PORT, 10) || 4000
-const dev = process.env.NODE_ENV !== 'production'
 
 const app = express()
-const server = new ApolloServer({ typeDefs, resolvers })
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: async (ctx) => {
+    const db = await makeDb()
+    return { ...ctx, db }
+  },
+})
 server.applyMiddleware({ app })
-
-const httpServer = createServer(server)
+const httpServer = createServer(app)
 server.installSubscriptionHandlers(httpServer)
 
 httpServer.listen(PORT, () => {
