@@ -23,6 +23,7 @@
     "apollo-server": "^2.12.0",
     "apollo-server-express": "^2.12.0",
     "arangojs": "6",
+    "cors": "^2.8.5",
     "cross-env": "^7.0.2",
     "d3-brush": "^1.1.5",
     "d3-drag": "^1.2.5",
