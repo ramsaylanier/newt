@@ -9,7 +9,8 @@ import {
   Icon,
 } from '@chakra-ui/core'
 import PageListItem from './pageListItem'
-import { query as PageQuery } from '../pages/[_key]'
+import useSearchFilters from '../utils/useSearchFilters'
+// import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
   query AllPages($filters: [FilterInput], $offset: Int, $count: Int) {
@@ -64,14 +65,23 @@ export const query = gql`
 
 const PageList = () => {
   const [value, setValue] = React.useState('')
-  const filters = value
-    ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
-    : []
+  const { filters, setFilters } = useSearchFilters()
+
+  React.useEffect(() => {
+    const filters = value
+      ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
+      : []
+
+    setFilters(filters)
+  }, [value])
+
   const variables = { filters }
 
   const { data, error } = useQuery(query, {
     variables,
   })
+
+  console.log(data)
 
   if (error) throw error
 

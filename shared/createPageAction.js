@@ -38,7 +38,10 @@ const CreatePageAction = ({ buttonColor, onCreate }) => {
 
   const handleCreate = (e) => {
     e.preventDefault()
-    createPage({ variables: { title } })
+    createPage({
+      variables: { title },
+      refetchQueries: ['AllPages'],
+    })
     onClose()
     setTitle('')
   }
