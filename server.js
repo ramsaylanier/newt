@@ -13,7 +13,14 @@ app.use(cors())
 const server = new ApolloServer({ typeDefs, resolvers })
 server.applyMiddleware({ app })
 
-const httpServer = createServer(server)
+const httpServer = createServer(
+  server(function (req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Request-Method', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
+    res.setHeader('Access-Control-Allow-Headers', '*')
+  })
+)
 server.installSubscriptionHandlers(httpServer)
 
 httpServer.listen(PORT, () => {
