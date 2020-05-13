@@ -9,16 +9,10 @@ const PORT = parseInt(process.env.PORT, 10) || 4000
 const dev = process.env.NODE_ENV !== 'production'
 
 const app = express()
-app.use(cors())
 const server = new ApolloServer({ typeDefs, resolvers })
 server.applyMiddleware({ app })
 
-const httpServer = createServer(function (req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Request-Method', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
-  res.setHeader('Access-Control-Allow-Headers', '*')
-})
+const httpServer = createServer(server)
 server.installSubscriptionHandlers(httpServer)
 
 httpServer.listen(PORT, () => {
