@@ -3,7 +3,7 @@
 const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
 const uniq = require('lodash/uniq')
-const forEach = require('lodash/forEach')
+// const forEach = require('lodash/forEach')
 
 const resolvers = {
   Page: {
@@ -196,29 +196,29 @@ const resolvers = {
           }
         })
 
-        // using forEach from lodash because I'm lazy
-        // and didn't want to setup multiple Promise.all() for other subscriptions
-        forEach(linksFromContent, async (link) => {
-          try {
-            const result = await edgeCollection.save(
-              {
-                _from: `Pages/${args.id}`,
-                _to: `Pages/${link.pageKey}`,
-                blockKeys: link.blockKeys,
-              },
-              { returnNew: true }
-            )
-            const edge = {
-              ...result.new,
-              from: result.new._from,
-              to: result.new._to,
-            }
+        // // using forEach from lodash because I'm lazy
+        // // and didn't want to setup multiple Promise.all() for other subscriptions
+        // forEach(linksFromContent, async (link) => {
+        //   try {
+        //     const result = await edgeCollection.save(
+        //       {
+        //         _from: `Pages/${args.id}`,
+        //         _to: `Pages/${link.pageKey}`,
+        //         blockKeys: link.blockKeys,
+        //       },
+        //       { returnNew: true }
+        //     )
+        //     const edge = {
+        //       ...result.new,
+        //       from: result.new._from,
+        //       to: result.new._to,
+        //     }
 
-            // pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
-          } catch (e) {
-            console.log(e)
-          }
-        })
+        //     pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
+        //   } catch (e) {
+        //     console.log(e)
+        //   }
+        // })
 
         return collection.document(newDocument)
       } catch (e) {
