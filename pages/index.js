@@ -3,7 +3,7 @@ import Head from 'next/head'
 import Layout from '../shared/layout'
 import { Box, Text } from '@chakra-ui/core'
 
-export default function Home() {
+const Home = () => {
   return (
     <div className="container">
       <Head>
@@ -27,3 +27,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home

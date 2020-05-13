@@ -1,5 +1,5 @@
 const { Database } = require('arangojs')
-const config = require('../config')
+const config = require('./config')
 
 const makeDb = async () => {
   const db = new Database({

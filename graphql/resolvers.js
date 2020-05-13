@@ -1,10 +1,10 @@
 const { PubSub } = require('graphql-subscriptions')
 const pubSub = new PubSub()
+const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
 const uniq = require('lodash/uniq')
 const forEach = require('lodash/forEach')
 
-const { aql } = require('arangojs')
 const resolvers = {
   Page: {
     edges: async (parent, args, { db }) => {
@@ -61,7 +61,6 @@ const resolvers = {
   },
   Query: {
     pages: async (parent, args, { db }) => {
-      console.log(db)
       let filter = ''
       let limit = ''
       try {
@@ -277,4 +276,4 @@ const resolvers = {
   },
 }
 
-module.exports = resolvers
+export default resolvers

@@ -1,8 +1,7 @@
 import React from 'react'
 import NextApp from 'next/app'
 import { ThemeProvider, ColorModeProvider } from '@chakra-ui/core'
-import { ApolloProvider } from '@apollo/react-hooks'
-import client from '../graphql/client'
+import { withApollo } from '../graphql/apollo'
 import theme from '../theme'
 import '../normalize.css'
 import '../typeplate.css'
@@ -14,17 +13,15 @@ class App extends NextApp {
   render() {
     const { Component } = this.props
     return (
-      <ApolloProvider client={client}>
-        <ThemeProvider theme={theme}>
-          <ColorModeProvider>
-            <DndProvider backend={Backend}>
-              <Component />
-            </DndProvider>
-          </ColorModeProvider>
-        </ThemeProvider>
-      </ApolloProvider>
+      <ThemeProvider theme={theme}>
+        <ColorModeProvider>
+          <DndProvider backend={Backend}>
+            <Component />
+          </DndProvider>
+        </ColorModeProvider>
+      </ThemeProvider>
     )
   }
 }
 
-export default App
+export default withApollo(App)
