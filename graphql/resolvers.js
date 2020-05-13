@@ -1,5 +1,5 @@
-const { PubSub } = require('graphql-subscriptions')
-const pubSub = new PubSub()
+// const { PubSub } = require('graphql-subscriptions')
+// const pubSub = new PubSub()
 const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
 const uniq = require('lodash/uniq')
@@ -103,7 +103,7 @@ const resolvers = {
           lastEdited: new Date(),
         })
         const document = collection.document(newPage)
-        pubSub.publish('pageAdded', { pageAdded: document })
+        // pubSub.publish('pageAdded', { pageAdded: document })
         return document
       } catch (e) {
         console.log(e)
@@ -114,7 +114,7 @@ const resolvers = {
       try {
         const document = await collection.document(args.id)
         collection.remove(document._key)
-        pubSub.publish('pageDeleted', { pageDeleted: document })
+        // pubSub.publish('pageDeleted', { pageDeleted: document })
         return document
       } catch (e) {
         console.log(e)
@@ -128,7 +128,7 @@ const resolvers = {
           title: args.title,
         })
         const newDocument = await collection.document(update)
-        pubSub.publish('pageUpdated', { pageUpdated: newDocument })
+        // pubSub.publish('pageUpdated', { pageUpdated: newDocument })
         return newDocument
       } catch (e) {
         console.log(e)
@@ -144,7 +144,7 @@ const resolvers = {
           lastEdited: new Date(),
         })
         const newDocument = await collection.document(update)
-        pubSub.publish('pageUpdated', { pageUpdated: newDocument })
+        // pubSub.publish('pageUpdated', { pageUpdated: newDocument })
         const entityMap = args.content.entityMap
         const blocks = args.content.blocks
 
@@ -214,7 +214,7 @@ const resolvers = {
               to: result.new._to,
             }
 
-            pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
+            // pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
           } catch (e) {
             console.log(e)
           }
@@ -263,17 +263,17 @@ const resolvers = {
       }
     },
   },
-  Subscription: {
-    pageAdded: {
-      subscribe: () => pubSub.asyncIterator(['pageAdded']),
-    },
-    pageDeleted: {
-      subscribe: () => pubSub.asyncIterator(['pageDeleted']),
-    },
-    pageEdgeAdded: {
-      subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
-    },
-  },
+  // Subscription: {
+  //   pageAdded: {
+  //     subscribe: () => pubSub.asyncIterator(['pageAdded']),
+  //   },
+  //   pageDeleted: {
+  //     subscribe: () => pubSub.asyncIterator(['pageDeleted']),
+  //   },
+  //   pageEdgeAdded: {
+  //     subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
+  //   },
+  // },
 }
 
 export default resolvers

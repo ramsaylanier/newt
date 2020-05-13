@@ -49,11 +49,11 @@ const typeDefs = gql`
     ): [PageEdge]
   }
 
-  type Subscription {
-    pageAdded: Page
-    pageDeleted: Page
-    pageEdgeAdded: PageEdge
-  }
+  # type Subscription {
+  #   pageAdded: Page
+  #   pageDeleted: Page
+  #   pageEdgeAdded: PageEdge
+  # }
 `
 
 export default typeDefs
