@@ -7,7 +7,7 @@ import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from 'apollo-utilities'
 import fetch from 'node-fetch'
 
-const host = 'http://ec2-54-175-88-74.compute-1.amazonaws.com/graphql'
+const host = 'ec2-54-175-88-74.compute-1.amazonaws.com/graphql'
 
 const wsLink = process.browser
   ? new WebSocketLink({
