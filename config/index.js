@@ -1,22 +1,22 @@
+let config
 const isProd = process.env.NODE_ENV === 'production'
-let databaseName, databaseHost, graphqlHost
 
 if (isProd) {
-  databaseName = process.env.DATABASE_NAME
-  databaseHost = process.env.DATABASE_HOST
-  graphqlHost = process.env.GRAPHQL_HOST
+  config = {
+    database: {
+      host: process.env.DATABASE_NAME,
+      name: process.env.DATABASE_HOST,
+    },
+    graphql: {
+      host: process.env.GRAPHQL_HOST,
+    },
+    pusher: {
+      key: process.env.PUSHER_KEY,
+      secret: process.env.PUSHER_SECRET,
+    },
+  }
 } else {
-  databaseName = 'newt'
-  databaseHost = 'http://localhost:8529'
-  graphqlHost = 'localhost:4000/graphql'
+  config = require('./dev.json')
 }
 
-module.exports = {
-  database: {
-    host: databaseHost,
-    name: databaseName,
-  },
-  graphql: {
-    host: graphqlHost,
-  },
-}
+module.exports = config

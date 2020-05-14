@@ -48,12 +48,6 @@ const typeDefs = gql`
       blockKey: String!
     ): [PageEdge]
   }
-
-  # type Subscription {
-  #   pageAdded: Page
-  #   pageDeleted: Page
-  #   pageEdgeAdded: PageEdge
-  # }
 `
 
 export default typeDefs
