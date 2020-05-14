@@ -6,7 +6,7 @@
     "lint": "eslint ./shared/** ./pages/** -c .eslintrc.json --fix --ext js,jsx",
     "dev-server": "nodemon --ignore pages/ --ignore shared/ --ignore graphql/ --ignore ./theme.js server.js",
     "dev-client": "next dev",
-    "build": "next build",
+    "build": "cross-env NODE_ENV=production next build",
     "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {
