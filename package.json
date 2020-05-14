@@ -7,7 +7,7 @@
     "dev-server": "nodemon --ignore pages/ --ignore shared/ --ignore graphql/ --ignore ./theme.js server.js",
     "dev-client": "next dev",
     "build": "cross-env NODE_ENV=production next build",
-    "start": "cross-env NODE_ENV=production node server.js"
+    "start": "cross-env NODE_ENV=production next start"
   },
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
@@ -38,7 +38,7 @@
     "graphql": "^15.0.0",
     "graphql-subscriptions": "^1.1.0",
     "graphql-tag": "^2.10.3",
-    "next": "9.3.5",
+    "next": "^9.4.0",
     "node-fetch": "^2.6.0",
     "pusher": "^3.0.1",
     "pusher-js": "^6.0.2",

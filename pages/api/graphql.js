@@ -3,12 +3,14 @@ import typeDefs from '../../graphql/typeDefs'
 import resolvers from '../../graphql/resolvers'
 import makeDb from '../../database'
 import Pusher from 'pusher'
-import cfg from '../../config'
+
+const pusherKey = process.env.PUSHER_KEY
+const pusherSecret = process.env.NEXT_PUBLIC_PUSHER_KEY
 
 var pusher = new Pusher({
   appId: '1000613',
-  key: cfg.pusher.key,
-  secret: cfg.pusher.secret,
+  key: pusherKey,
+  secret: pusherSecret,
   cluster: 'us2',
   encrypted: true,
 })
