@@ -1,6 +1,8 @@
 let config
 const isProd = process.env.NODE_ENV === 'production'
 
+console.log('IS PROD', isProd)
+
 if (isProd) {
   config = {
     database: {
@@ -18,5 +20,7 @@ if (isProd) {
 } else {
   config = require('./dev.json')
 }
+
+console.log(config)
 
 module.exports = config
