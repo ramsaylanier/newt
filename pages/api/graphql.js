@@ -4,8 +4,8 @@ import resolvers from '../../graphql/resolvers'
 import makeDb from '../../database'
 import Pusher from 'pusher'
 
-const pusherKey = process.env.PUSHER_KEY
-const pusherSecret = process.env.NEXT_PUBLIC_PUSHER_KEY
+const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
+const pusherSecret = process.env.PUSHER_SECRET
 
 var pusher = new Pusher({
   appId: '1000613',
