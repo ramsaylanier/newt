@@ -1,14 +1,16 @@
 const { Database } = require('arangojs')
-const config = require('./config')
+
+const host = process.env.DATABASE_HOST
+const name = process.env.DATABASE_NAME
 
 const makeDb = async () => {
   const db = new Database({
-    url: config.database.host,
+    url: host,
   })
 
   try {
     const useDb = () => {
-      db.useDatabase(config.database.name)
+      db.useDatabase(name)
       db.useBasicAuth('root', '')
     }
 
@@ -18,7 +20,7 @@ const makeDb = async () => {
     if (!exists) {
       console.log('nope')
       db.useDatabase('_system')
-      await db.createDatabase(config.database.name, [{ username: 'root' }])
+      await db.createDatabase(name, [{ username: 'root' }])
       useDb()
     }
 

@@ -1,4 +1,5 @@
 export const getEntitiesFromText = (text, blockKey) => {
+  console.trace('GETTING')
   const options = {
     method: 'POST',
     body: JSON.stringify({ text }),

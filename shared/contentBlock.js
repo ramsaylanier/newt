@@ -22,6 +22,8 @@ import { useDrop } from 'react-dnd'
 import { getEntitiesFromText } from '../utils/adaptApi'
 import { updatePageMutation } from '../graphql/mutations'
 
+const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
+
 const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
     const entityKey = character.getEntity()
@@ -93,7 +95,10 @@ export default function ContentBlock({ page }) {
     if (page?.content) {
       const content = convertFromRaw(page.content)
       setEditorState(EditorState.createWithContent(content, decorator))
-      getPageLinkSuggestions(content)
+
+      if (enableAdaptApi) {
+        getPageLinkSuggestions(content)
+      }
     } else {
       setEditorState(EditorState.createEmpty(decorator))
     }
@@ -115,7 +120,10 @@ export default function ContentBlock({ page }) {
         updatePageContent({
           variables: { id: _key, content },
         })
-        getPageLinkSuggestions(updatedContentState)
+
+        if (enableAdaptApi) {
+          getPageLinkSuggestions(updatedContentState)
+        }
       }
     }, 1000)
   ).current

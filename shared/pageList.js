@@ -10,7 +10,8 @@ import {
 } from '@chakra-ui/core'
 import PageListItem from './pageListItem'
 import useSearchFilters from '../utils/useSearchFilters'
-// import { query as PageQuery } from '../pages/[_key]'
+import usePusher from '../utils/usePusher'
+import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
   query AllPages($filters: [FilterInput], $offset: Int, $count: Int) {
@@ -22,49 +23,45 @@ export const query = gql`
   }
 `
 
-// const addedSubscription = gql`
-//   subscription onPageAdded {
-//     pageAdded {
-//       _id
-//       _key
-//       title
-//     }
-//   }
-// `
-
-// const deletedSubscription = gql`
-//   subscription onPageDeleted {
-//     pageDeleted {
-//       _id
-//       _key
-//       title
-//     }
-//   }
-// `
-
-// const pageEdgeAddedSubscription = gql`
-//   subscription onPageEdgeAdded {
-//     pageEdgeAdded {
-//       _id
-//       _key
-//       from {
-//         _id
-//         _key
-//         title
-//       }
-//       to {
-//         _id
-//         _key
-//         title
-//       }
-//       blockKeys
-//       excerpt
-//     }
-//   }
-// `
-
 const PageList = () => {
   const [value, setValue] = React.useState('')
+
+  usePusher('pageAdded', ({ client, data }) => {
+    let { pages } = client.readQuery({ query, variables })
+    pages = [data, ...pages]
+    client.writeQuery({ query, variables, data: { pages } })
+  })
+
+  usePusher('pageDeleted', ({ client, data }) => {
+    let { pages } = client.readQuery({ query, variables })
+    pages = pages.filter((p) => p._id !== data._id)
+    client.writeQuery({ query, variables, data: { pages } })
+  })
+
+  usePusher('pageEdgeAdded', ({ client, data }) => {
+    const toKey = data?.to?._key || null
+    if (toKey) {
+      const filter = `page._id == 'Pages/${toKey}'`
+      try {
+        const result = client.readQuery({
+          query: PageQuery,
+          variables,
+        })
+        if (result) {
+          const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
+          result.page.edges.push(newEdge)
+          client.writeQuery({
+            query: PageQuery,
+            variables: { ...variables, filter },
+            data: result,
+          })
+        }
+      } catch (e) {
+        //
+      }
+    }
+  })
+
   const { filters, setFilters } = useSearchFilters()
 
   React.useEffect(() => {
@@ -81,56 +78,7 @@ const PageList = () => {
     variables,
   })
 
-  console.log(data)
-
   if (error) throw error
-
-  // useSubscription(addedSubscription, {
-  //   onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-  //     console.log(data)
-  //     if (data?.pageAdded) {
-  //       let { pages } = client.readQuery({ query, variables })
-  //       pages = [data.pageAdded, ...pages]
-  //       client.writeQuery({ query, variables, data: { pages } })
-  //     }
-  //   },
-  // })
-
-  // useSubscription(deletedSubscription, {
-  //   onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-  //     if (data?.pageDeleted) {
-  //       let { pages } = client.readQuery({ query, variables })
-  //       pages = pages.filter((p) => p._id !== data.pageDeleted._id)
-  //       client.writeQuery({ query, variables, data: { pages } })
-  //     }
-  //   },
-  // })
-
-  // useSubscription(pageEdgeAddedSubscription, {
-  //   onSubscriptionData: ({ client, subscriptionData: { data } }) => {
-  //     const toKey = data?.pageEdgeAdded?.to?._key || null
-  //     if (toKey) {
-  //       const filter = `page._id == 'Pages/${toKey}'`
-  //       try {
-  //         const result = client.readQuery({
-  //           query: PageQuery,
-  //           variables,
-  //         })
-  //         if (result) {
-  //           const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
-  //           result.page.edges.push(newEdge)
-  //           client.writeQuery({
-  //             query: PageQuery,
-  //             variables: { ...variables, filter },
-  //             data: result,
-  //           })
-  //         }
-  //       } catch (e) {
-  //         //
-  //       }
-  //     }
-  //   },
-  // })
 
   const pages = data?.pages || []
 

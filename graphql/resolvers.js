@@ -1,9 +1,7 @@
-// const { PubSub } = require('graphql-subscriptions')
-// const pubSub = new PubSub()
 const { aql } = require('arangojs')
 const { getPage, getGraph } = require('./connectors')
 const uniq = require('lodash/uniq')
-// const forEach = require('lodash/forEach')
+const forEach = require('lodash/forEach')
 
 const resolvers = {
   Page: {
@@ -60,7 +58,8 @@ const resolvers = {
     },
   },
   Query: {
-    pages: async (parent, args, { db }) => {
+    pages: async (parent, args, { db, pusher }) => {
+      console.log('pusher', pusher)
       let filter = ''
       let limit = ''
       try {
@@ -94,7 +93,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    createPage: async (parent, args, { db }) => {
+    createPage: async (parent, args, { db, pusher }) => {
       const collection = db.collection('Pages')
 
       try {
@@ -102,19 +101,23 @@ const resolvers = {
           title: args.title,
           lastEdited: new Date(),
         })
-        const document = collection.document(newPage)
-        // pubSub.publish('pageAdded', { pageAdded: document })
+        const document = await collection.document(newPage)
+        pusher.trigger('subscription', 'pageAdded', {
+          message: { ...document, __typename: 'Page' },
+        })
         return document
       } catch (e) {
         console.log(e)
       }
     },
-    deletePage: async (parent, args, { db }) => {
+    deletePage: async (parent, args, { db, pusher }) => {
       const collection = db.collection('Pages')
       try {
         const document = await collection.document(args.id)
         collection.remove(document._key)
-        // pubSub.publish('pageDeleted', { pageDeleted: document })
+        pusher.trigger('subscription', 'pageDeleted', {
+          message: { ...document, __typename: 'Page' },
+        })
         return document
       } catch (e) {
         console.log(e)
@@ -128,13 +131,12 @@ const resolvers = {
           title: args.title,
         })
         const newDocument = await collection.document(update)
-        // pubSub.publish('pageUpdated', { pageUpdated: newDocument })
         return newDocument
       } catch (e) {
         console.log(e)
       }
     },
-    updatePageContent: async (parent, args, { db }) => {
+    updatePageContent: async (parent, args, { db, pusher }) => {
       const collection = db.collection('Pages')
       const edgeCollection = db.edgeCollection('PageEdges')
       try {
@@ -144,7 +146,6 @@ const resolvers = {
           lastEdited: new Date(),
         })
         const newDocument = await collection.document(update)
-        // pubSub.publish('pageUpdated', { pageUpdated: newDocument })
         const entityMap = args.content.entityMap
         const blocks = args.content.blocks
 
@@ -196,29 +197,31 @@ const resolvers = {
           }
         })
 
-        // // using forEach from lodash because I'm lazy
-        // // and didn't want to setup multiple Promise.all() for other subscriptions
-        // forEach(linksFromContent, async (link) => {
-        //   try {
-        //     const result = await edgeCollection.save(
-        //       {
-        //         _from: `Pages/${args.id}`,
-        //         _to: `Pages/${link.pageKey}`,
-        //         blockKeys: link.blockKeys,
-        //       },
-        //       { returnNew: true }
-        //     )
-        //     const edge = {
-        //       ...result.new,
-        //       from: result.new._from,
-        //       to: result.new._to,
-        //     }
+        // using forEach from lodash because I'm lazy
+        // and didn't want to setup multiple Promise.all() for other subscriptions
+        forEach(linksFromContent, async (link) => {
+          try {
+            const result = await edgeCollection.save(
+              {
+                _from: `Pages/${args.id}`,
+                _to: `Pages/${link.pageKey}`,
+                blockKeys: link.blockKeys,
+              },
+              { returnNew: true }
+            )
+            const edge = {
+              ...result.new,
+              from: result.new._from,
+              to: result.new._to,
+            }
 
-        //     pubSub.publish('pageEdgeAdded', { pageEdgeAdded: edge })
-        //   } catch (e) {
-        //     console.log(e)
-        //   }
-        // })
+            pusher.trigger('subscription', 'pageEdgeAdded', {
+              message: { ...edge, __typename: 'PageEdge' },
+            })
+          } catch (e) {
+            console.log(e)
+          }
+        })
 
         return collection.document(newDocument)
       } catch (e) {
@@ -265,14 +268,16 @@ const resolvers = {
   },
   // Subscription: {
   //   pageAdded: {
-  //     subscribe: () => pubSub.asyncIterator(['pageAdded']),
+  //     subscribe: (parent, args, context) => {
+  //       return pubSub.asyncIterator(['pageAdded'])
+  //     },
   //   },
-  //   pageDeleted: {
-  //     subscribe: () => pubSub.asyncIterator(['pageDeleted']),
-  //   },
-  //   pageEdgeAdded: {
-  //     subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
-  //   },
+  //   // pageDeleted: {
+  //   //   subscribe: () => pubSub.asyncIterator(['pageDeleted']),
+  //   // },
+  //   // pageEdgeAdded: {
+  //   //   subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
+  //   // },
   // },
 }
 
