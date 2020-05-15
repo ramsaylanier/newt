@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <div className="container">
       <Head>
-        <title>Create</title>
+        <title>Newt: Notes Worth Taking</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

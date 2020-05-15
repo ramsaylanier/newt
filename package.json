@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "eslint ./shared/** ./pages/** -c .eslintrc.json --fix --ext js,jsx",
     "dev-server": "nodemon --ignore pages/ --ignore shared/ --ignore graphql/ --ignore ./theme.js server.js",
-    "dev-client": "next dev",
+    "dev": "next dev",
     "build": "cross-env NODE_ENV=production next build",
     "start": "cross-env NODE_ENV=production next start"
   },
