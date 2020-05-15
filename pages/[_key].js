@@ -59,7 +59,7 @@ const Page = () => {
   return (
     <div className="container">
       <Head>
-        <title>Create</title>
+        <title>Newt - {page?.title || 'loading'}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

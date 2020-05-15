@@ -7,10 +7,6 @@ import { useRouter } from 'next/router'
 export default function Sidebar() {
   const router = useRouter()
 
-  const onCreatePage = (createdPage) => {
-    router.push('/[_key]', `/${createdPage._key}`)
-  }
-
   const handleClick = () => {
     router.push('/graph')
   }
@@ -25,7 +21,7 @@ export default function Sidebar() {
       maxW={250}
     >
       <Flex alignItem="center" justifyContent="space-between">
-        <CreatePageAction onCreate={onCreatePage} buttonColor="green" />
+        <CreatePageAction buttonColor="green" />
         <IconButton icon="graph" onClick={handleClick} />
       </Flex>
       <PageList />
