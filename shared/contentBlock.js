@@ -6,15 +6,12 @@ import {
   Editor,
   EditorState,
   RichUtils,
-  CompositeDecorator,
   convertToRaw,
   convertFromRaw,
   getDefaultKeyBinding,
 } from 'draft-js'
-import { addPageLink } from '../utils/draftUtil'
+import { addPageLink, decorator } from '../utils/draftUtil'
 import ContentBlockControls from './contentBlockControls'
-import ContentBlockPageLink from './contentBlockPageLink'
-import ContentBlockHttpLink from './contentBlockHttpLink'
 import SuggestedPageLinks from './suggestedPageLinks'
 import debounce from 'lodash/debounce'
 import isEqual from 'lodash/isEqual'
@@ -24,48 +21,11 @@ import { updatePageMutation } from '../graphql/mutations'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
-const getPageLink = (contentBlock, callback, contentState) => {
-  contentBlock.findEntityRanges((character) => {
-    const entityKey = character.getEntity()
-    if (entityKey === null) {
-      return false
-    }
-    const entity = contentState.getEntity(entityKey)
-    return entity.type === 'PAGELINK'
-  }, callback)
-}
-
-const getHttpLink = (contentBlock, callback, contentState) => {
-  contentBlock.findEntityRanges((character) => {
-    const entityKey = character.getEntity()
-    if (entityKey === null) {
-      return false
-    }
-    const entity = contentState.getEntity(entityKey)
-    return entity.type === 'LINK'
-  }, callback)
-}
-
-const decorator = new CompositeDecorator([
-  {
-    strategy: getPageLink,
-    component: ContentBlockPageLink,
-  },
-  {
-    strategy: getHttpLink,
-    component: ContentBlockHttpLink,
-  },
-])
-
-export default function ContentBlock({ page }) {
+export default function ContentBlock({ page, editorState, setEditorState }) {
   const contentRef = React.useRef(null)
   const router = useRouter()
   const { _key } = router.query
   const [updatePageContent] = useMutation(updatePageMutation)
-
-  const [editorState, setEditorState] = React.useState(
-    EditorState.createEmpty(decorator)
-  )
   const [suggestedPageLinks, setSuggestedPageLinks] = React.useState([])
   const editorRef = React.useRef(null)
 

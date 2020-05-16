@@ -1,4 +1,44 @@
-import { Modifier, EditorState, SelectionState } from 'draft-js'
+import {
+  Modifier,
+  EditorState,
+  CompositeDecorator,
+  SelectionState,
+} from 'draft-js'
+import ContentBlockPageLink from '../shared/contentBlockPageLink'
+import ContentBlockHttpLink from '../shared/contentBlockHttpLink'
+
+export const getPageLink = (contentBlock, callback, contentState) => {
+  contentBlock.findEntityRanges((character) => {
+    const entityKey = character.getEntity()
+    if (entityKey === null) {
+      return false
+    }
+    const entity = contentState.getEntity(entityKey)
+    return entity.type === 'PAGELINK'
+  }, callback)
+}
+
+export const getHttpLink = (contentBlock, callback, contentState) => {
+  contentBlock.findEntityRanges((character) => {
+    const entityKey = character.getEntity()
+    if (entityKey === null) {
+      return false
+    }
+    const entity = contentState.getEntity(entityKey)
+    return entity.type === 'LINK'
+  }, callback)
+}
+
+export const decorator = new CompositeDecorator([
+  {
+    strategy: getPageLink,
+    component: ContentBlockPageLink,
+  },
+  {
+    strategy: getHttpLink,
+    component: ContentBlockHttpLink,
+  },
+])
 
 export const addPageLink = (editorState, page) => {
   let entityKey, updatedSelectionState, updatedContentState

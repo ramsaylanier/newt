@@ -1,7 +1,16 @@
+import {
+  convertFromRaw,
+  Modifier,
+  ContentBlock,
+  SelectionState,
+  convertToRaw,
+  genKey,
+} from 'draft-js'
+import { List } from 'immutable'
+
 const { aql } = require('arangojs')
-const { getPage, getGraph } = require('./connectors')
+const { getPage, getGraph, updatePageContent } = require('./connectors')
 const uniq = require('lodash/uniq')
-const forEach = require('lodash/forEach')
 
 const resolvers = {
   Page: {
@@ -137,93 +146,37 @@ const resolvers = {
       }
     },
     updatePageContent: async (parent, args, { db, pusher }) => {
-      const collection = db.collection('Pages')
-      const edgeCollection = db.edgeCollection('PageEdges')
+      return updatePageContent(args, db, pusher)
+    },
+    addSelectionToPageContent: async (parent, args, { db, pusher }) => {
+      console.log(args)
       try {
-        const document = await collection.document(args.id)
-        const update = await collection.update(document._key, {
-          content: args.content,
-          lastEdited: new Date(),
+        const page = await getPage(`page._id == '${args.pageId}'`, db)
+        console.log(page)
+        const newBlock = new ContentBlock({
+          key: genKey(),
+          type: 'unstyled',
+          text: '',
+          characterList: List(),
         })
-        const newDocument = await collection.document(update)
-        const entityMap = args.content.entityMap
-        const blocks = args.content.blocks
+        page.content.blocks.push(newBlock)
+        const contentState = convertFromRaw(page.content)
+        const selectionState = SelectionState.createEmpty(newBlock.key)
+        const updatedContentState = Modifier.insertText(
+          contentState,
+          selectionState,
+          args.selection
+        )
+        const content = convertToRaw(updatedContentState)
 
-        let linksFromContent = []
-
-        Object.keys(entityMap).forEach(async (key) => {
-          const entity = entityMap[key]
-          const pageKey = entity.data.pageKey
-          if (entity.type === 'PAGELINK') {
-            const block = blocks.find((b) => {
-              const keys = b.entityRanges.map((r) => r.key)
-              return keys.includes(Number(key))
-            })
-            const link = { pageKey, blockKey: block.key }
-            linksFromContent.push(link)
-          }
+        const update = await updatePageContent(
+          { content, id: args.pageId },
+          db,
+          pusher
+        )
+        pusher.trigger('subscription', 'contentAddedFromLinker', {
+          message: { ...update, __typename: 'Page' },
         })
-
-        linksFromContent = linksFromContent.reduce((links, currentLink) => {
-          const existingLink = links.find(
-            (l) => l.pageKey === currentLink.pageKey
-          )
-          if (existingLink) {
-            existingLink.blockKeys.push(currentLink.blockKey)
-          } else {
-            links.push({
-              pageKey: currentLink.pageKey,
-              blockKeys: [currentLink.blockKey],
-            })
-          }
-
-          return links
-        }, [])
-
-        const existingLinks = await edgeCollection.outEdges(`Pages/${args.id}`)
-        existingLinks.forEach((existingLink) => {
-          const contentLink = linksFromContent.find(
-            (l) => l.pageKey === existingLinks._key
-          )
-          if (contentLink) {
-            edgeCollection.update(existingLink._key, {
-              blockKey: contentLink.blockKeys,
-            })
-            linksFromContent = linksFromContent.filter(
-              (l) => l.pageKey !== contentLink.pageKey
-            )
-          } else {
-            edgeCollection.remove(existingLink._id)
-          }
-        })
-
-        // using forEach from lodash because I'm lazy
-        // and didn't want to setup multiple Promise.all() for other subscriptions
-        forEach(linksFromContent, async (link) => {
-          try {
-            const result = await edgeCollection.save(
-              {
-                _from: `Pages/${args.id}`,
-                _to: `Pages/${link.pageKey}`,
-                blockKeys: link.blockKeys,
-              },
-              { returnNew: true }
-            )
-            const edge = {
-              ...result.new,
-              from: result.new._from,
-              to: result.new._to,
-            }
-
-            pusher.trigger('subscription', 'pageEdgeAdded', {
-              message: { ...edge, __typename: 'PageEdge' },
-            })
-          } catch (e) {
-            console.log(e)
-          }
-        })
-
-        return collection.document(newDocument)
       } catch (e) {
         console.log(e)
       }

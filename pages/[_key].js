@@ -8,6 +8,9 @@ import { Box, Divider, Text, Flex, IconButton } from '@chakra-ui/core'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
 import ContentBlock from '../shared/contentBlock'
+import usePusher from '../utils/usePusher'
+import { EditorState, convertFromRaw } from 'draft-js'
+import { decorator } from '../utils/draftUtil'
 
 export const query = gql`
   query Page($filter: String!) {
@@ -40,11 +43,23 @@ export const query = gql`
 const Page = () => {
   const router = useRouter()
   const { _key } = router.query
-  const skip = !_key
-  const { data, error, refetch } = useQuery(query, {
-    variables: { filter: `page._id == 'Pages/${_key}'` },
-    skip,
+  const filter = `page._id == 'Pages/${_key}'`
+  const [editorState, setEditorState] = React.useState(
+    EditorState.createEmpty(decorator)
+  )
+
+  usePusher('contentAddedFromLinker', ({ data }) => {
+    console.log(data)
+    const content = convertFromRaw(data.content)
+    const updatedEditorState = EditorState.push(editorState, content)
+    setEditorState(updatedEditorState)
   })
+
+  const { data, error, refetch } = useQuery(query, {
+    variables: { filter },
+  })
+
+  console.log(data)
 
   if (error) throw error
 
@@ -76,7 +91,12 @@ const Page = () => {
                 <IconButton icon="repeat" onClick={handleRefetch} />
               </Flex>
               <Text fontSize="sm">Last edited: {lastEdited}</Text>
-              <ContentBlock page={page} key={page._id} />
+              <ContentBlock
+                editorState={editorState}
+                setEditorState={setEditorState}
+                page={page}
+                key={page._id}
+              />
             </Box>
 
             <Divider color="gray.400" />
