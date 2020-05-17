@@ -8,7 +8,7 @@ const pusher = new Pusher(pusherKey, {
 })
 const channel = pusher.subscribe('subscription')
 
-const usePusher = (messageType, callback) => {
+const usePusher = (messageType, callback, deps = []) => {
   const client = useApolloClient()
   React.useEffect(() => {
     channel.bind(
@@ -20,7 +20,7 @@ const usePusher = (messageType, callback) => {
     )
 
     return () => channel.unbind(messageType)
-  }, [])
+  }, deps)
 }
 
 export default usePusher

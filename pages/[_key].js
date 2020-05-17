@@ -48,18 +48,35 @@ const Page = () => {
     EditorState.createEmpty(decorator)
   )
 
-  usePusher('contentAddedFromLinker', ({ data }) => {
-    console.log(data)
-    const content = convertFromRaw(data.content)
-    const updatedEditorState = EditorState.push(editorState, content)
-    setEditorState(updatedEditorState)
-  })
+  usePusher(
+    'contentAddedFromLinker',
+    ({ client, data }) => {
+      client.writeFragment({
+        id: data._id,
+        fragment: gql`
+          fragment updatedPage on Page {
+            _id
+            content
+          }
+        `,
+        data: {
+          id: data._id,
+          content: data.content,
+        },
+      })
+
+      if (data._key === _key) {
+        const content = convertFromRaw(data.content)
+        const updatedEditorState = EditorState.push(editorState, content)
+        setEditorState(updatedEditorState)
+      }
+    },
+    [_key]
+  )
 
   const { data, error, refetch } = useQuery(query, {
     variables: { filter },
   })
-
-  console.log(data)
 
   if (error) throw error
 
