@@ -19,8 +19,12 @@ const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context: async (ctx) => {
-    const db = await makeDb()
-    return { ...ctx, db, pusher }
+    try {
+      const db = await makeDb()
+      return { ...ctx, db, pusher }
+    } catch (e) {
+      console.log('ee', e)
+    }
   },
 })
 

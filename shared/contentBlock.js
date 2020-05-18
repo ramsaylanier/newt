@@ -10,7 +10,7 @@ import {
   convertFromRaw,
   getDefaultKeyBinding,
 } from 'draft-js'
-import { addPageLink, decorator } from '../utils/draftUtil'
+import { addPageLink, decorator, blockRendererFn } from '../utils/draftUtil'
 import ContentBlockControls from './contentBlockControls'
 import SuggestedPageLinks from './suggestedPageLinks'
 import debounce from 'lodash/debounce'
@@ -150,6 +150,7 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
           ref={editorRef}
           keyBindingFn={keyBindingFn}
           handleKeyCommand={handleKeyCommand}
+          blockRendererFn={blockRendererFn}
           editorState={editorState}
           onChange={handleChange}
           placeholder="Enter some content..."

@@ -1,0 +1,6 @@
+{
+  "domain": "{YOUR AUTH0 DOMAIN}",
+  "clientId": "{YOUR AUTH0 CLIENT ID}",
+  "secret": "{YOUR AUTH0 SECRET KEY}",
+  "redirectUri": "{YOUR AUTH0 REDICRET URI}"
+}

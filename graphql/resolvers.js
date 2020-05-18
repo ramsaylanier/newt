@@ -67,8 +67,7 @@ const resolvers = {
     },
   },
   Query: {
-    pages: async (parent, args, { db, pusher }) => {
-      console.log('pusher', pusher)
+    pages: async (parent, args, { db }) => {
       let filter = ''
       let limit = ''
       try {
@@ -149,14 +148,17 @@ const resolvers = {
       return updatePageContent(args, db, pusher)
     },
     addSelectionToPageContent: async (parent, args, { db, pusher }) => {
-      console.log(args)
       try {
+        const { selection, pageId, source } = args
+        console.log('SPURCE', source)
         const page = await getPage(`page._id == '${args.pageId}'`, db)
-        console.log(page)
         const newBlock = new ContentBlock({
           key: genKey(),
-          type: 'unstyled',
+          type: 'fromExtension',
           text: '',
+          data: {
+            source,
+          },
           characterList: List(),
         })
         page.content.blocks.push(newBlock)
@@ -165,12 +167,12 @@ const resolvers = {
         const updatedContentState = Modifier.insertText(
           contentState,
           selectionState,
-          args.selection
+          selection
         )
         const content = convertToRaw(updatedContentState)
 
         const update = await updatePageContent(
-          { content, id: args.pageId },
+          { content, id: pageId },
           db,
           pusher
         )

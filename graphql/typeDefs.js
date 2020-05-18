@@ -42,7 +42,11 @@ const typeDefs = gql`
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
     updatePageContent(id: String, content: GenericScalar): Page
-    addSelectionToPageContent(pageId: String!, selection: String!): Page
+    addSelectionToPageContent(
+      pageId: String!
+      selection: String!
+      source: String!
+    ): Page
     createPageEdge(
       source: String!
       target: String!

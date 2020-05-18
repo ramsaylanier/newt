@@ -6,6 +6,17 @@ import {
 } from 'draft-js'
 import ContentBlockPageLink from '../shared/contentBlockPageLink'
 import ContentBlockHttpLink from '../shared/contentBlockHttpLink'
+import ContentBlockExtensionLink from '../shared/contentBlockExtensionLink'
+
+export const blockRendererFn = (block) => {
+  const type = block.getType()
+  if (type === 'fromExtension') {
+    return {
+      component: ContentBlockExtensionLink,
+      editable: true,
+    }
+  }
+}
 
 export const getPageLink = (contentBlock, callback, contentState) => {
   contentBlock.findEntityRanges((character) => {
