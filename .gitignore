@@ -32,5 +32,5 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-#auth
+# auth
 auth_config.json
