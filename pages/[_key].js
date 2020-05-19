@@ -11,6 +11,7 @@ import ContentBlock from '../shared/contentBlock'
 import usePusher from '../utils/usePusher'
 import { EditorState, convertFromRaw } from 'draft-js'
 import { decorator } from '../utils/draftUtil'
+import { useAuth } from '../utils/auth'
 
 export const query = gql`
   query Page($filter: String!) {
@@ -20,6 +21,7 @@ export const query = gql`
       title
       content
       lastEdited
+      ownerId
       edges {
         _id
         _key
@@ -44,6 +46,7 @@ const Page = () => {
   const router = useRouter()
   const { _key } = router.query
   const filter = `page._id == 'Pages/${_key}'`
+  const { user } = useAuth()
   const [editorState, setEditorState] = React.useState(
     EditorState.createEmpty(decorator)
   )
@@ -74,7 +77,7 @@ const Page = () => {
     [_key]
   )
 
-  const { data, error, refetch } = useQuery(query, {
+  const { data, loading, error, refetch } = useQuery(query, {
     variables: { filter },
   })
 
@@ -88,6 +91,9 @@ const Page = () => {
 
   const handleRefetch = () => refetch()
 
+  if (loading) return 'Loading...'
+
+  const isOwner = page.ownerId === user?.sub
   return (
     <div className="container">
       <Head>
@@ -104,8 +110,10 @@ const Page = () => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <PageTitle title={page.title} />
-                <IconButton icon="repeat" onClick={handleRefetch} />
+                <PageTitle title={page.title} isOwner={isOwner} />
+                {isOwner && (
+                  <IconButton icon="repeat" onClick={handleRefetch} />
+                )}
               </Flex>
               <Text fontSize="sm">Last edited: {lastEdited}</Text>
               <ContentBlock

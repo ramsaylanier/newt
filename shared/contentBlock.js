@@ -18,16 +18,19 @@ import isEqual from 'lodash/isEqual'
 import { useDrop } from 'react-dnd'
 import { getEntitiesFromText } from '../utils/adaptApi'
 import { updatePageMutation } from '../graphql/mutations'
+import { useAuth } from '../utils/auth'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
 export default function ContentBlock({ page, editorState, setEditorState }) {
   const contentRef = React.useRef(null)
   const router = useRouter()
+  const { user } = useAuth()
   const { _key } = router.query
   const [updatePageContent] = useMutation(updatePageMutation)
   const [suggestedPageLinks, setSuggestedPageLinks] = React.useState([])
   const editorRef = React.useRef(null)
+  const isOwner = user && page.ownerId === user?.sub
 
   const [{ dropResult }, drop] = useDrop({
     accept: 'Page',
@@ -134,35 +137,54 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
     }
   }
 
-  return (
-    <Box fontSize=".9rem" ref={drop}>
-      <Box bg="gray.100" position="relative" zIndex="2">
-        <ContentBlockControls
+  if (isOwner) {
+    return (
+      <Box fontSize=".9rem" ref={drop}>
+        <Box bg="gray.100" position="relative" zIndex="2">
+          <ContentBlockControls
+            editorState={editorState}
+            setEditorState={setEditorState}
+            onToggle={handleToggle}
+            onToggleStyles={handleToggleStyles}
+          />
+        </Box>
+
+        <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
+          <Editor
+            ref={editorRef}
+            keyBindingFn={keyBindingFn}
+            handleKeyCommand={handleKeyCommand}
+            blockRendererFn={blockRendererFn}
+            editorState={editorState}
+            onChange={handleChange}
+            placeholder="Enter some content..."
+            spellCheck={true}
+          />
+        </Box>
+
+        <SuggestedPageLinks
+          suggestedPageLinks={suggestedPageLinks}
           editorState={editorState}
           setEditorState={setEditorState}
-          onToggle={handleToggle}
-          onToggleStyles={handleToggleStyles}
         />
       </Box>
-
-      <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
-        <Editor
-          ref={editorRef}
-          keyBindingFn={keyBindingFn}
-          handleKeyCommand={handleKeyCommand}
-          blockRendererFn={blockRendererFn}
-          editorState={editorState}
-          onChange={handleChange}
-          placeholder="Enter some content..."
-          spellCheck={true}
-        />
+    )
+  } else {
+    return (
+      <Box fontSize=".9rem" ref={drop}>
+        <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
+          <Editor
+            ref={editorRef}
+            keyBindingFn={keyBindingFn}
+            handleKeyCommand={handleKeyCommand}
+            blockRendererFn={blockRendererFn}
+            editorState={editorState}
+            placeholder="Enter some content..."
+            spellCheck={true}
+            readOnly={true}
+          />
+        </Box>
       </Box>
-
-      <SuggestedPageLinks
-        suggestedPageLinks={suggestedPageLinks}
-        editorState={editorState}
-        setEditorState={setEditorState}
-      />
-    </Box>
-  )
+    )
+  }
 }

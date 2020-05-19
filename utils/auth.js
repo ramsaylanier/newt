@@ -7,12 +7,10 @@ export const Auth0Provider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log('useEffect')
     const initAuth0 = async () => {
       try {
         setLoading(true)
         const res = await fetch('http://localhost:3000/api/auth/me')
-        console.log(res)
         if (res.ok) {
           const user = await res.json()
           setUser(user)

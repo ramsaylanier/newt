@@ -7,6 +7,16 @@ const typeDefs = gql`
     filter: String!
   }
 
+  type User {
+    id: ID!
+    name: String
+    nickname: String
+    picture: String
+    locale: String
+    updated_at: String
+    pages(filters: [FilterInput], count: Int, offset: Int): [Page]
+  }
+
   type Page {
     _id: ID!
     _key: String
@@ -14,6 +24,8 @@ const typeDefs = gql`
     edges: [PageEdge]
     content: GenericScalar
     lastEdited: String
+    ownerId: String
+    owner: User
   }
 
   type PageEdge {
@@ -32,9 +44,9 @@ const typeDefs = gql`
   }
 
   type Query {
-    pages(filters: [FilterInput], count: Int, offset: Int): [Page]
     page(filter: String!): Page
     graph(name: String!): Graph
+    user: User
   }
 
   type Mutation {

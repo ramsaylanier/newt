@@ -21,7 +21,7 @@ const mutation = gql`
   }
 `
 
-export default function PageTitle({ title }) {
+export default function PageTitle({ title, isOwner }) {
   const router = useRouter()
   const { _key } = router.query
   const [isEditing, setIsEditing] = React.useState(false)
@@ -90,7 +90,7 @@ export default function PageTitle({ title }) {
         <Flex alignItems="center">
           <Text fontSize="3xl" mb="0">
             {title}
-            <IconButton icon="edit" onClick={handleClick} />
+            {isOwner && <IconButton icon="edit" onClick={handleClick} />}
           </Text>
         </Flex>
       )}

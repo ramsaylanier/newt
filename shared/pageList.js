@@ -1,6 +1,7 @@
 import React from 'react'
 import gql from 'graphql-tag'
 import { useQuery } from '@apollo/react-hooks'
+import { useAuth } from '../utils/auth'
 import {
   Input,
   InputGroup,
@@ -14,28 +15,30 @@ import usePusher from '../utils/usePusher'
 import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
-  query AllPages($filters: [FilterInput], $offset: Int, $count: Int) {
-    pages(filters: $filters, offset: $offset, count: $count) {
-      _id
-      _key
-      title
+  query UserPages($filters: [FilterInput], $offset: Int, $count: Int) {
+    user {
+      id
+      pages(filters: $filters, offset: $offset, count: $count) {
+        _id
+        _key
+        title
+      }
     }
   }
 `
 
 const PageList = () => {
   const [value, setValue] = React.useState('')
+  const { user } = useAuth()
 
   usePusher('pageAdded', ({ client, data }) => {
-    let { pages } = client.readQuery({ query, variables })
-    pages = [data, ...pages]
-    client.writeQuery({ query, variables, data: { pages } })
+    let { user } = client.readQuery({ query, variables })
+    user.pages = [data, ...user.pages]
+    client.writeQuery({ query, variables, data: { user } })
   })
 
-  usePusher('pageDeleted', ({ client, data }) => {
-    let { pages } = client.readQuery({ query, variables })
-    pages = pages.filter((p) => p._id !== data._id)
-    client.writeQuery({ query, variables, data: { pages } })
+  usePusher('pageDeleted', () => {
+    refetch()
   })
 
   usePusher('pageEdgeAdded', ({ client, data }) => {
@@ -74,13 +77,14 @@ const PageList = () => {
 
   const variables = { filters }
 
-  const { data, error } = useQuery(query, {
+  const { data, error, refetch } = useQuery(query, {
     variables,
+    skip: !user,
   })
 
   if (error) throw error
 
-  const pages = data?.pages || []
+  const pages = data?.user?.pages || []
 
   const handleChange = (e) => {
     setValue(e.target.value)

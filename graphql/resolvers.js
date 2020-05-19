@@ -13,6 +13,34 @@ const { getPage, getGraph, updatePageContent } = require('./connectors')
 const uniq = require('lodash/uniq')
 
 const resolvers = {
+  User: {
+    pages: async (parent, args, { db }) => {
+      let filter = `FILTER page.ownerId == '${parent.id}'`
+      let limit = ''
+      try {
+        const collection = db.collection('pageSearch')
+        const { filters = [], count = 25, offset = 0 } = args
+        filters.forEach((f) => {
+          filter += `FILTER ${f.filter}`
+        })
+        filter = aql.literal(filter)
+        if (count) {
+          limit = `LIMIT ${offset}, ${count}`
+        }
+        limit = aql.literal(limit)
+        const query = await db.query(aql`
+          FOR page IN ${collection} 
+          ${filter}
+          SORT page.lastEdited DESC
+          ${limit}
+          RETURN page
+        `)
+        return query._result || []
+      } catch (e) {
+        console.log(e)
+      }
+    },
+  },
   Page: {
     edges: async (parent, args, { db }) => {
       const collection = db.edgeCollection('PageEdges')
@@ -23,6 +51,13 @@ const resolvers = {
         return edges
       } catch (e) {
         console.log(e)
+      }
+    },
+    owner: async (parent, args, { user }) => {
+      const { sub, ...rest } = user
+      return {
+        id: sub,
+        ...rest,
       }
     },
   },
@@ -67,30 +102,14 @@ const resolvers = {
     },
   },
   Query: {
-    pages: async (parent, args, { db }) => {
-      let filter = ''
-      let limit = ''
-      try {
-        const collection = db.collection('pageSearch')
-        const { filters = [], count, offset = 0 } = args
-        filters.forEach((f) => {
-          filter += `FILTER ${f.filter}`
-        })
-        filter = aql.literal(filter)
-        if (count) {
-          limit = `LIMIT ${offset}, ${count}`
-        }
-        limit = aql.literal(limit)
-        const query = await db.query(aql`
-          FOR page IN ${collection} 
-          ${filter}
-          SORT page.lastEdited DESC
-          ${limit}
-          RETURN page
-        `)
-        return query._result || []
-      } catch (e) {
-        console.log(e)
+    user: (parent, args, { user }) => {
+      if (!user) return null
+
+      const { sub, ...rest } = user
+
+      return {
+        id: sub,
+        ...rest,
       }
     },
     page: async (parent, args, { db }) => {
@@ -101,13 +120,14 @@ const resolvers = {
     },
   },
   Mutation: {
-    createPage: async (parent, args, { db, pusher }) => {
+    createPage: async (parent, args, { db, pusher, user }) => {
       const collection = db.collection('Pages')
-
+      if (!user) return
       try {
         const newPage = await collection.save({
           title: args.title,
           lastEdited: new Date(),
+          ownerId: user.sub,
         })
         const document = await collection.document(newPage)
         pusher.trigger('subscription', 'pageAdded', {
@@ -118,10 +138,16 @@ const resolvers = {
         console.log(e)
       }
     },
-    deletePage: async (parent, args, { db, pusher }) => {
+    deletePage: async (parent, args, { db, pusher, user }) => {
+      if (!user) return null
       const collection = db.collection('Pages')
       try {
         const document = await collection.document(args.id)
+
+        if (document.ownerId !== user.sub) {
+          throw Error("You aren't the owner")
+        }
+
         collection.remove(document._key)
         pusher.trigger('subscription', 'pageDeleted', {
           message: { ...document, __typename: 'Page' },
@@ -150,7 +176,6 @@ const resolvers = {
     addSelectionToPageContent: async (parent, args, { db, pusher }) => {
       try {
         const { selection, pageId, source } = args
-        console.log('SPURCE', source)
         const page = await getPage(`page._id == '${args.pageId}'`, db)
         const newBlock = new ContentBlock({
           key: genKey(),

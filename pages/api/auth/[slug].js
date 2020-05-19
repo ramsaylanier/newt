@@ -5,8 +5,6 @@ export default async function auth(req, res) {
     query: { slug },
   } = req
 
-  console.log(slug)
-
   try {
     if (slug === 'login') {
       await auth0.handleLogin(req, res)

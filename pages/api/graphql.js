@@ -3,6 +3,7 @@ import typeDefs from '../../graphql/typeDefs'
 import resolvers from '../../graphql/resolvers'
 import makeDb from '../../database'
 import Pusher from 'pusher'
+import auth0 from '../../utils/auth-server'
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 const pusherSecret = process.env.PUSHER_SECRET
@@ -21,9 +22,11 @@ const apolloServer = new ApolloServer({
   context: async (ctx) => {
     try {
       const db = await makeDb()
-      return { ...ctx, db, pusher }
+      const session = await auth0.getSession(ctx.req)
+      const user = session ? session.user : null
+      return { ...ctx, db, pusher, user }
     } catch (e) {
-      console.log('ee', e)
+      console.log(e)
     }
   },
 })

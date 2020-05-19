@@ -21,8 +21,7 @@ const deleteMutation = gql`
   mutation DeletePage($id: String!) {
     deletePage(id: $id) {
       _id
-      _key
-      title
+      ownerId
     }
   }
 `
