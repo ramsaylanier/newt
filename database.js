@@ -2,6 +2,7 @@ const { Database } = require('arangojs')
 
 const host = process.env.DATABASE_HOST
 const name = process.env.DATABASE_NAME
+const password = process.env.DATABASE_PASSWORD || ''
 
 const makeDb = async () => {
   const db = new Database({
@@ -11,7 +12,7 @@ const makeDb = async () => {
   try {
     const useDb = () => {
       db.useDatabase(name)
-      db.useBasicAuth('root', '')
+      db.useBasicAuth('root', password)
     }
 
     useDb()
