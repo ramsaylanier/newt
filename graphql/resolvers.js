@@ -9,7 +9,12 @@ import {
 import { List } from 'immutable'
 
 const { aql } = require('arangojs')
-const { getPage, getGraph, updatePageContent } = require('./connectors')
+const {
+  getPage,
+  getGraph,
+  updatePageContent,
+} = require('./connectors/pageConnectors.js')
+const { getUserById } = require('./connectors/authConnector.js')
 const uniq = require('lodash/uniq')
 
 const resolvers = {
@@ -53,12 +58,17 @@ const resolvers = {
         console.log(e)
       }
     },
-    owner: async (parent, args, { user }) => {
-      const { sub, ...rest } = user
-      return {
-        id: sub,
-        ...rest,
-      }
+    owner: async (parent) => {
+      console.log(parent)
+      const ownerId = parent.ownerId
+      const owner = await getUserById(ownerId)
+      console.log(owner)
+
+      // const { sub, ...rest } = user
+      // return {
+      //   id: sub,
+      //   ...rest,
+      // }
     },
   },
   PageEdge: {
@@ -102,7 +112,7 @@ const resolvers = {
     },
   },
   Query: {
-    user: (parent, args, { user }) => {
+    currentUser: (parent, args, { user }) => {
       if (!user) return null
 
       const { sub, ...rest } = user
@@ -111,6 +121,9 @@ const resolvers = {
         id: sub,
         ...rest,
       }
+    },
+    user: (parent, args) => {
+      console.log(args)
     },
     page: async (parent, args, { db }) => {
       return getPage(args.filter, db)

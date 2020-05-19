@@ -1,16 +1,21 @@
 import { initAuth0 } from '@auth0/nextjs-auth0'
-import config from '../auth_config.json'
+
+const domain = process.env.AUTH_DOMAIN
+const clientId = process.env.AUTH_CLIENTID
+const redirectUri = process.env.AUTH_REDIRECT_URI
+const clientSecret = process.env.AUTH_SECRET
+const cookieSecret = process.env.AUTH_COOKIE_SECRET
 
 export default initAuth0({
-  domain: config.domain,
-  clientId: config.clientId,
-  clientSecret: config.secret,
+  domain,
+  clientId,
+  clientSecret,
   scope: 'openid profile',
-  redirectUri: 'http://localhost:3000/api/auth/callback',
+  redirectUri,
   postLogoutRedirectUri: 'http://localhost:3000/',
   session: {
     // The secret used to encrypt the cookie.
-    cookieSecret: config.cookieSecret,
+    cookieSecret,
     // The cookie lifetime (expiration) in seconds. Set to 8 hours by default.
     cookieLifetime: 60 * 60 * 8,
     // (Optional) The cookie domain this should run on. Leave it blank to restrict it to your domain.

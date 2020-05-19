@@ -4,7 +4,7 @@ import { useQuery } from '@apollo/react-hooks'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
-import { Box, Divider, Text, Flex, IconButton } from '@chakra-ui/core'
+import { Box, Badge, Divider, Text, Flex, IconButton } from '@chakra-ui/core'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
 import ContentBlock from '../shared/contentBlock'
@@ -21,7 +21,11 @@ export const query = gql`
       title
       content
       lastEdited
-      ownerId
+      private
+      owner {
+        id
+        name
+      }
       edges {
         _id
         _key
@@ -93,7 +97,7 @@ const Page = () => {
 
   if (loading) return 'Loading...'
 
-  const isOwner = page.ownerId === user?.sub
+  const isOwner = user ? page.owner.id === user.sub : false
   return (
     <div className="container">
       <Head>
@@ -115,6 +119,14 @@ const Page = () => {
                   <IconButton icon="repeat" onClick={handleRefetch} />
                 )}
               </Flex>
+              {isOwner && (
+                <Badge
+                  variantColor={page.private ? 'green' : 'orange'}
+                  variant="solid"
+                >
+                  {page.private ? 'Private' : 'Public'}
+                </Badge>
+              )}
               <Text fontSize="sm">Last edited: {lastEdited}</Text>
               <ContentBlock
                 editorState={editorState}

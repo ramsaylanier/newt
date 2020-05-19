@@ -15,8 +15,8 @@ import usePusher from '../utils/usePusher'
 import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
-  query UserPages($filters: [FilterInput], $offset: Int, $count: Int) {
-    user {
+  query CurrentUserPages($filters: [FilterInput], $offset: Int, $count: Int) {
+    currentUser {
       id
       pages(filters: $filters, offset: $offset, count: $count) {
         _id
@@ -32,9 +32,9 @@ const PageList = () => {
   const { user } = useAuth()
 
   usePusher('pageAdded', ({ client, data }) => {
-    let { user } = client.readQuery({ query, variables })
-    user.pages = [data, ...user.pages]
-    client.writeQuery({ query, variables, data: { user } })
+    let { currentUser } = client.readQuery({ query, variables })
+    currentUser.pages = [data, ...currentUser.pages]
+    client.writeQuery({ query, variables, data: { currentUser } })
   })
 
   usePusher('pageDeleted', () => {
@@ -84,7 +84,7 @@ const PageList = () => {
 
   if (error) throw error
 
-  const pages = data?.user?.pages || []
+  const pages = data?.currentUser?.pages || []
 
   const handleChange = (e) => {
     setValue(e.target.value)

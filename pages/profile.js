@@ -1,13 +1,14 @@
 import React from 'react'
 import Head from 'next/head'
 import Layout from '../shared/layout'
-import { Box } from '@chakra-ui/core'
+import { Box, Link } from '@chakra-ui/core'
 import { useQuery } from '@apollo/react-hooks'
+import PageTitle from '../shared/pageTitle'
 import gql from 'graphql-tag'
 
 const query = gql`
   query UserQuery {
-    user {
+    currentUser {
       id
       name
       picture
@@ -18,8 +19,7 @@ const query = gql`
 
 const Home = () => {
   const { data } = useQuery(query)
-  const user = data ? data.user : null
-  console.log(user)
+  const user = data ? data.currentUser : null
 
   if (!user) return null
 
@@ -31,7 +31,10 @@ const Home = () => {
       </Head>
 
       <Layout>
-        <Box display="flex" alignItems="center" justifyContent="center"></Box>
+        <Box display="flex" alignItems="center" p="4">
+          <PageTitle title="Profile" />
+          <Link href="/api/auth/logout">Logout</Link>
+        </Box>
       </Layout>
     </div>
   )

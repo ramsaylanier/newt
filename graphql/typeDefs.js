@@ -26,6 +26,7 @@ const typeDefs = gql`
     lastEdited: String
     ownerId: String
     owner: User
+    private: Boolean
   }
 
   type PageEdge {
@@ -46,7 +47,8 @@ const typeDefs = gql`
   type Query {
     page(filter: String!): Page
     graph(name: String!): Graph
-    user: User
+    currentUser: User
+    user(userId: String!): User
   }
 
   type Mutation {
