@@ -19,7 +19,6 @@ const makeDb = async () => {
     const exists = await db.exists()
 
     if (!exists) {
-      console.log('nope')
       db.useDatabase('_system')
       await db.createDatabase(name, [{ username: 'root' }])
       useDb()
