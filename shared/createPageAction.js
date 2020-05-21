@@ -12,6 +12,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Text,
 } from '@chakra-ui/core'
 
 const addMutation = gql`
@@ -55,8 +56,8 @@ const CreatePageAction = ({ buttonColor, onCreate }) => {
         onClick={onOpen}
         variantColor={buttonColor}
         variant="solid"
-        mb="2"
         rightIcon="small-add"
+        fontSize="1em"
       >
         Create Page
       </Button>

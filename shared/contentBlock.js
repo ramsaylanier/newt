@@ -18,7 +18,7 @@ import isEqual from 'lodash/isEqual'
 import { useDrop } from 'react-dnd'
 import { getEntitiesFromText } from '../utils/adaptApi'
 import { updatePageMutation } from '../graphql/mutations'
-import { useAuth } from '../utils/auth'
+import { useAuth } from '../utils/authClient'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
@@ -30,7 +30,7 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
   const [updatePageContent] = useMutation(updatePageMutation)
   const [suggestedPageLinks, setSuggestedPageLinks] = React.useState([])
   const editorRef = React.useRef(null)
-  const isOwner = user && page.ownerId === user?.sub
+  const isOwner = user && page ? user.sub === page.owner.id : false
 
   const [{ dropResult }, drop] = useDrop({
     accept: 'Page',
@@ -149,7 +149,13 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
           />
         </Box>
 
-        <Box px="4" py="8" bg="gray.100" position="relative" zIndex="1">
+        <Box
+          px={{ base: 2, md: 4 }}
+          py={{ base: 4, md: 8 }}
+          bg="gray.100"
+          position="relative"
+          zIndex="1"
+        >
           <Editor
             ref={editorRef}
             keyBindingFn={keyBindingFn}
@@ -179,7 +185,6 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
             handleKeyCommand={handleKeyCommand}
             blockRendererFn={blockRendererFn}
             editorState={editorState}
-            placeholder="Enter some content..."
             spellCheck={true}
             readOnly={true}
           />

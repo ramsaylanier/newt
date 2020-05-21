@@ -1,4 +1,4 @@
-import auth0 from '../../../utils/auth-server'
+import auth0 from '../../../utils/authServer'
 
 export default async function auth(req, res) {
   const {

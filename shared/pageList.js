@@ -1,7 +1,7 @@
 import React from 'react'
 import gql from 'graphql-tag'
 import { useQuery } from '@apollo/react-hooks'
-import { useAuth } from '../utils/auth'
+import { useAuth } from '../utils/authClient'
 import {
   Input,
   InputGroup,
@@ -22,6 +22,9 @@ export const query = gql`
         _id
         _key
         title
+        owner {
+          id
+        }
       }
     }
   }

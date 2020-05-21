@@ -119,4 +119,24 @@ const updatePageContent = async (args, db, pusher) => {
   }
 }
 
-module.exports = { getPage, getGraph, updatePageContent }
+const updatePageSettings = async (args, db, user) => {
+  const collection = db.collection('Pages')
+
+  try {
+    const document = await collection.document(args.id)
+
+    if (document.ownerId !== user.id) {
+      throw Error("You aren't the owner of this page")
+    }
+
+    const update = await collection.update(document._key, args.update)
+    const newDocument = await collection.document(update)
+    console.log(newDocument)
+
+    return collection.document(newDocument)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+module.exports = { getPage, getGraph, updatePageContent, updatePageSettings }

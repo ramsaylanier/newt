@@ -94,7 +94,7 @@ export default function ContentBlockControls(props) {
 
   return (
     <Box className="RichEditor-controls">
-      <Flex>
+      <Flex flexWrap="wrap">
         <Menu>
           <MenuButton as={Button} rightIcon="chevron-down">
             {currentTextStyle}

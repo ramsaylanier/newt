@@ -7,13 +7,13 @@ export default function Layout(props) {
     <Grid
       display="grid"
       templateAreas={`sidebar main`}
-      templateColumns="auto 1fr"
-      templateRows="100vh"
+      templateColumns={{ md: 'auto 1fr' }}
+      templateRows={{ base: 'auto 1fr', md: '100vh' }}
     >
       <Box gridTemplateArea="sidebar">
         <Sidebar />
       </Box>
-      <Box gridTemplateArea="sidebar" position="relative">
+      <Box gridTemplateArea="main" position="relative">
         {props.children}
       </Box>
     </Grid>

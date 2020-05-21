@@ -3,7 +3,7 @@ import typeDefs from '../../graphql/typeDefs'
 import resolvers from '../../graphql/resolvers'
 import makeDb from '../../database'
 import Pusher from 'pusher'
-import auth0 from '../../utils/auth-server'
+import auth0 from '../../utils/authServer'
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 const pusherSecret = process.env.PUSHER_SECRET

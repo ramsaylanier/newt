@@ -1,14 +1,22 @@
 import React from 'react'
 import PageList from './pageList'
-import { Box, Flex, Text, IconButton, Link, Image } from '@chakra-ui/core'
+import {
+  Box,
+  Flex,
+  Spinner,
+  Text,
+  IconButton,
+  Link,
+  Image,
+} from '@chakra-ui/core'
 import CreatePageAction from './createPageAction'
 import { useRouter } from 'next/router'
-import { useAuth } from '../utils/auth'
+import { useAuth } from '../utils/authClient'
 import RouteLink from 'next/link'
 
 export default function Sidebar() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
   const handleClick = () => {
     router.push('/graph')
@@ -19,23 +27,40 @@ export default function Sidebar() {
   return (
     <Flex
       position="relative"
-      height="100%"
+      height={{ base: 'auto', md: '100%' }}
       backgroundColor="green.300"
-      p="4"
-      maxW={250}
-      direction="column"
+      p={{ base: '1', md: '4' }}
+      width={{ base: '100%', md: '25vw' }}
+      maxW={{ base: '100%', md: '250px' }}
+      direction={{ base: 'row', md: 'column' }}
+      justifyContent="space-between"
+      alignItems={{ base: 'center', md: 'inherit' }}
     >
       {user ? (
         <React.Fragment>
-          <Flex alignItem="center" justifyContent="space-between">
+          <Flex
+            alignItem="center"
+            justifyContent="space-between"
+            direction="row"
+          >
             <CreatePageAction buttonColor="green" />
-            <IconButton icon="graph" onClick={handleClick} />
+            <IconButton
+              icon="graph"
+              onClick={handleClick}
+              variantColor="green"
+              ml="2"
+            />
           </Flex>
-          <Box overflow="auto" flex="1">
+          <Box
+            overflow="auto"
+            flex="1"
+            display={{ base: 'none', md: 'block' }}
+            mt="2"
+          >
             <PageList />
           </Box>
           <Box py="2">
-            <RouteLink href="/profile" alignSelf="flex-end">
+            <RouteLink href="/profile">
               <Link display="flex" alignItems="center">
                 <Image
                   src={user.picture}
@@ -50,6 +75,8 @@ export default function Sidebar() {
             </RouteLink>
           </Box>
         </React.Fragment>
+      ) : loading ? (
+        <Spinner color="green" />
       ) : (
         <Link href={authLink}>{'login'}</Link>
       )}

@@ -88,9 +88,11 @@ export default function PageTitle({ title, isOwner }) {
         </form>
       ) : (
         <Flex alignItems="center" width="100%">
-          <Text fontSize="3xl" mb="0">
+          <Text fontSize="3xl" mb="0" display="flex" alignItems="center">
             {title}
-            {isOwner && <IconButton icon="edit" onClick={handleClick} />}
+            {isOwner && (
+              <IconButton icon="edit" onClick={handleClick} variant="ghost" />
+            )}
           </Text>
         </Flex>
       )}

@@ -56,6 +56,7 @@ const typeDefs = gql`
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
     updatePageContent(id: String, content: GenericScalar): Page
+    updatePageSettings(id: String, update: GenericScalar): Page
     addSelectionToPageContent(
       pageId: String!
       selection: String!

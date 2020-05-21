@@ -13,7 +13,8 @@ const {
   getPage,
   getGraph,
   updatePageContent,
-} = require('./connectors/pageConnectors.js')
+  updatePageSettings,
+} = require('./connectors/pageConnector.js')
 const { getUserById } = require('./connectors/authConnector.js')
 const uniq = require('lodash/uniq')
 
@@ -59,16 +60,9 @@ const resolvers = {
       }
     },
     owner: async (parent) => {
-      console.log(parent)
       const ownerId = parent.ownerId
       const owner = await getUserById(ownerId)
-      console.log(owner)
-
-      // const { sub, ...rest } = user
-      // return {
-      //   id: sub,
-      //   ...rest,
-      // }
+      return owner
     },
   },
   PageEdge: {
@@ -122,8 +116,11 @@ const resolvers = {
         ...rest,
       }
     },
-    user: (parent, args) => {
-      console.log(args)
+    user: async (parent, args) => {
+      console.log(args.userId)
+      const user = await getUserById(args.userId)
+      console.log(user)
+      return user
     },
     page: async (parent, args, { db }) => {
       return getPage(args.filter, db)
@@ -185,6 +182,9 @@ const resolvers = {
     },
     updatePageContent: async (parent, args, { db, pusher }) => {
       return updatePageContent(args, db, pusher)
+    },
+    updatePageSettings: async (parent, args, { db, user }) => {
+      return updatePageSettings(args, db, user)
     },
     addSelectionToPageContent: async (parent, args, { db, pusher }) => {
       try {

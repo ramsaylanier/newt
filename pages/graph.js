@@ -9,6 +9,7 @@ import { forceSimulation, forceLink, forceCollide } from 'd3-force'
 import { select, event } from 'd3-selection'
 import { zoom, zoomIdentity } from 'd3-zoom'
 import theme from '../theme'
+import { useRouter } from 'next/router'
 
 let simulation, node, nodeMenu, link, label, activeNode
 
@@ -42,6 +43,7 @@ const query = gql`
 `
 
 export default function Graph() {
+  const router = useRouter()
   const rootRef = React.useRef(null)
   const svgRef = React.useRef(null)
   const zoomRef = React.useRef(null)
@@ -181,6 +183,7 @@ export default function Graph() {
     selection.fixed = false
     delete selection.fx
     delete selection.fy
+    router.push('/[_key]', `/${selection._key}`)
   }
 
   function handleDrag() {

@@ -17,6 +17,10 @@ p {
   margin-bottom: 1.15rem;
 }
 
+a {
+  text-decoration: underline;
+}
+
 h1,
 h2,
 h3,

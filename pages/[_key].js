@@ -4,14 +4,27 @@ import { useQuery } from '@apollo/react-hooks'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
-import { Box, Badge, Divider, Text, Flex, IconButton } from '@chakra-ui/core'
+import {
+  Box,
+  Badge,
+  Divider,
+  Text,
+  Flex,
+  IconButton,
+  Link,
+  Spinner,
+  Stack,
+  useDisclosure,
+} from '@chakra-ui/core'
+import RouterLink from 'next/link'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
+import PageSettingsModal from '../shared/pageSettingsModal'
 import ContentBlock from '../shared/contentBlock'
 import usePusher from '../utils/usePusher'
 import { EditorState, convertFromRaw } from 'draft-js'
 import { decorator } from '../utils/draftUtil'
-import { useAuth } from '../utils/auth'
+import { useAuth } from '../utils/authClient'
 
 export const query = gql`
   query Page($filter: String!) {
@@ -24,7 +37,7 @@ export const query = gql`
       private
       owner {
         id
-        name
+        nickname
       }
       edges {
         _id
@@ -47,6 +60,7 @@ export const query = gql`
 `
 
 const Page = () => {
+  const { isOpen, onClose, onOpen } = useDisclosure()
   const router = useRouter()
   const { _key } = router.query
   const filter = `page._id == 'Pages/${_key}'`
@@ -95,9 +109,7 @@ const Page = () => {
 
   const handleRefetch = () => refetch()
 
-  if (loading) return 'Loading...'
-
-  const isOwner = user ? page.owner.id === user.sub : false
+  const isOwner = user && page ? page.owner.id === user.sub : false
   return (
     <div className="container">
       <Head>
@@ -106,8 +118,19 @@ const Page = () => {
       </Head>
 
       <Layout>
+        {loading && (
+          <Flex
+            height="100%"
+            width="100%"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Spinner />
+          </Flex>
+        )}
+
         {page && (
-          <Box p={4}>
+          <Box p={{ base: 2, md: 4 }}>
             <Box mb="6">
               <Flex
                 width="100%"
@@ -116,16 +139,28 @@ const Page = () => {
               >
                 <PageTitle title={page.title} isOwner={isOwner} />
                 {isOwner && (
-                  <IconButton icon="repeat" onClick={handleRefetch} />
+                  <Stack isInline spacing={4} align="center">
+                    <IconButton icon="settings" onClick={onOpen} />
+                    <IconButton icon="repeat" onClick={handleRefetch} />
+                    <PageSettingsModal
+                      isOpen={isOpen}
+                      onClose={onClose}
+                      page={page}
+                    />
+                  </Stack>
                 )}
               </Flex>
-              {isOwner && (
+              {isOwner ? (
                 <Badge
                   variantColor={page.private ? 'green' : 'orange'}
                   variant="solid"
                 >
                   {page.private ? 'Private' : 'Public'}
                 </Badge>
+              ) : (
+                <RouterLink href="user/[userId]" as={`user/${page.owner.id}`}>
+                  <Link>By: {page.owner.nickname}</Link>
+                </RouterLink>
               )}
               <Text fontSize="sm">Last edited: {lastEdited}</Text>
               <ContentBlock

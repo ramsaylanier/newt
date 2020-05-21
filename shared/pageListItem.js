@@ -16,6 +16,7 @@ import {
 import { useMutation } from '@apollo/react-hooks'
 import gql from 'graphql-tag'
 import { useDrag } from 'react-dnd'
+import { useAuth } from '../utils/authClient'
 
 const deleteMutation = gql`
   mutation DeletePage($id: String!) {
@@ -29,6 +30,7 @@ export default function PageListItem({ page }) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
   const cancelRef = React.useRef()
+  const { user } = useAuth()
   const [, drag] = useDrag({
     item: { page, type: 'Page' },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
@@ -38,6 +40,7 @@ export default function PageListItem({ page }) {
     onClose()
     deletePage({ variables: { id: page._id } })
   }
+  const isOwner = page.owner ? page.owner.id === user?.sub : false
 
   return (
     <React.Fragment>
@@ -54,41 +57,45 @@ export default function PageListItem({ page }) {
         whiteSpace="nowrap"
         ref={drag}
       >
-        <RouteLink href={'[_key]'} as={page._key}>
+        <RouteLink href={'/[_key]'} as={`/${page._key}`}>
           <Link overflow="hidden" textOverflow="ellipsis" flex="1">
             {page.title}
           </Link>
         </RouteLink>
-        <Button ref={btnRef} size="xs" onClick={onOpen}>
-          <Icon name="delete" size="12px" />
-        </Button>
+        {isOwner && (
+          <Button ref={btnRef} size="xs" onClick={onOpen}>
+            <Icon name="delete" size="12px" />
+          </Button>
+        )}
       </ListItem>
 
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-      >
-        <AlertDialogOverlay />
-        <AlertDialogContent bg="white">
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete Page
-          </AlertDialogHeader>
+      {isOwner && (
+        <AlertDialog
+          isOpen={isOpen}
+          leastDestructiveRef={cancelRef}
+          onClose={onClose}
+        >
+          <AlertDialogOverlay />
+          <AlertDialogContent bg="white">
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete Page
+            </AlertDialogHeader>
 
-          <AlertDialogBody>
-            Are you sure? You can't undo this action afterwards.
-          </AlertDialogBody>
+            <AlertDialogBody>
+              Are you sure? You can't undo this action afterwards.
+            </AlertDialogBody>
 
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
-              Cancel
-            </Button>
-            <Button variantColor="red" onClick={handleDelete} ml={3}>
-              Delete
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button variantColor="red" onClick={handleDelete} ml={3}>
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </React.Fragment>
   )
 }

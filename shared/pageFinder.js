@@ -29,7 +29,8 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
     : []
   const { data } = useQuery(query, { variables: { filters }, skip })
 
-  const pages = data?.pages?.filter((page) => page._key !== _key) || []
+  const pages =
+    data?.currentUser?.pages?.filter((page) => page._key !== _key) || []
 
   const handleClick = (page) => {
     onSave(page)
