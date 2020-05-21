@@ -27,16 +27,16 @@ const updatePageMutation = gql`
 `
 
 const PageSettingsModal = ({ isOpen, onClose, page }) => {
-  const [privacy, setPrivate] = React.useState(page.private)
-  const [updatePage, { data }] = useMutation(updatePageMutation)
+  const [isPrivate, setIsPrivate] = React.useState(page.private)
+  const [updatePage] = useMutation(updatePageMutation)
 
   const handleChange = () => {
-    setPrivate(!privacy)
+    setIsPrivate(!isPrivate)
   }
 
   const handleSave = () => {
-    console.log(privacy)
-    updatePage({ variables: { id: page.id, update: { privacy } } })
+    updatePage({ variables: { id: page._id, update: { private: isPrivate } } })
+    onClose()
   }
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
@@ -51,7 +51,7 @@ const PageSettingsModal = ({ isOpen, onClose, page }) => {
               id="page-privacy"
               color="green"
               onChange={handleChange}
-              isChecked={privacy}
+              isChecked={isPrivate}
             />
           </Flex>
         </ModalBody>

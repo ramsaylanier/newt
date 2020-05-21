@@ -124,15 +124,12 @@ const updatePageSettings = async (args, db, user) => {
 
   try {
     const document = await collection.document(args.id)
-
-    if (document.ownerId !== user.id) {
+    if (document.ownerId !== user.sub) {
       throw Error("You aren't the owner of this page")
     }
 
     const update = await collection.update(document._key, args.update)
     const newDocument = await collection.document(update)
-    console.log(newDocument)
-
     return collection.document(newDocument)
   } catch (e) {
     console.log(e)
