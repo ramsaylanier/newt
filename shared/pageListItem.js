@@ -7,6 +7,7 @@ import {
   AlertDialogHeader,
   AlertDialogContent,
   AlertDialogOverlay,
+  Badge,
   ListItem,
   Button,
   Link,
@@ -58,10 +59,20 @@ export default function PageListItem({ page }) {
         ref={drag}
       >
         <RouteLink href={'/[_key]'} as={`/${page._key}`}>
-          <Link overflow="hidden" textOverflow="ellipsis" flex="1">
+          <Link
+            overflow="hidden"
+            textOverflow="ellipsis"
+            flex="1"
+            textDecoration="underline"
+          >
             {page.title}
           </Link>
         </RouteLink>
+        {page.private && (
+          <Badge variantColor="orange" mr="2">
+            private
+          </Badge>
+        )}
         {isOwner && (
           <Button ref={btnRef} size="xs" onClick={onOpen}>
             <Icon name="delete" size="12px" />

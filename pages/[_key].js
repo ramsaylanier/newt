@@ -61,6 +61,7 @@ export const query = gql`
 
 const Page = () => {
   const { isOpen, onClose, onOpen } = useDisclosure()
+  const [isLocked, setIsLocked] = React.useState(false)
   const router = useRouter()
   const { _key } = router.query
   const filter = `page._id == 'Pages/${_key}'`
@@ -95,7 +96,7 @@ const Page = () => {
     [_key]
   )
 
-  const { data, loading, error, refetch } = useQuery(query, {
+  const { data, loading, error } = useQuery(query, {
     variables: { filter },
   })
 
@@ -107,7 +108,7 @@ const Page = () => {
     ? new Date(page.lastEdited).toLocaleString('en-GB')
     : ''
 
-  const handleRefetch = () => refetch()
+  const handleLock = () => setIsLocked(!isLocked)
 
   const isOwner = user && page ? page.owner.id === user.sub : false
   return (
@@ -141,7 +142,10 @@ const Page = () => {
                 {isOwner && (
                   <Stack isInline spacing={4} align="center">
                     <IconButton icon="settings" onClick={onOpen} />
-                    <IconButton icon="repeat" onClick={handleRefetch} />
+                    <IconButton
+                      icon={isLocked ? 'lock' : 'unlock'}
+                      onClick={handleLock}
+                    />
                     <PageSettingsModal
                       isOpen={isOpen}
                       onClose={onClose}
@@ -152,7 +156,7 @@ const Page = () => {
               </Flex>
               {isOwner ? (
                 <Badge
-                  variantColor={page.private ? 'green' : 'orange'}
+                  variantColor={page.private ? 'orange' : 'green'}
                   variant="solid"
                 >
                   {page.private ? 'Private' : 'Public'}
@@ -168,6 +172,7 @@ const Page = () => {
                 setEditorState={setEditorState}
                 page={page}
                 key={page._id}
+                isLocked={isLocked}
               />
             </Box>
 

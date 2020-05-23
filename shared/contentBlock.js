@@ -22,7 +22,12 @@ import { useAuth } from '../utils/authClient'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
-export default function ContentBlock({ page, editorState, setEditorState }) {
+export default function ContentBlock({
+  page,
+  editorState,
+  setEditorState,
+  isLocked,
+}) {
   const contentRef = React.useRef(null)
   const router = useRouter()
   const { user } = useAuth()
@@ -140,18 +145,20 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
   if (isOwner) {
     return (
       <Box fontSize=".9rem" ref={drop}>
-        <Box bg="gray.100" position="relative" zIndex="2">
-          <ContentBlockControls
-            editorState={editorState}
-            setEditorState={setEditorState}
-            onToggle={handleToggle}
-            onToggleStyles={handleToggleStyles}
-          />
-        </Box>
+        {!isLocked && (
+          <Box bg="gray.100" position="relative" zIndex="2">
+            <ContentBlockControls
+              editorState={editorState}
+              setEditorState={setEditorState}
+              onToggle={handleToggle}
+              onToggleStyles={handleToggleStyles}
+            />
+          </Box>
+        )}
 
         <Box
           px={{ base: 2, md: 4 }}
-          py={{ base: 4, md: 8 }}
+          py={{ base: 4 }}
           bg="gray.100"
           position="relative"
           zIndex="1"
@@ -165,6 +172,7 @@ export default function ContentBlock({ page, editorState, setEditorState }) {
             onChange={handleChange}
             placeholder="Enter some content..."
             spellCheck={true}
+            readOnly={isLocked}
           />
         </Box>
 

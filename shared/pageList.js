@@ -22,6 +22,7 @@ export const query = gql`
         _id
         _key
         title
+        private
         owner {
           id
         }
@@ -99,7 +100,7 @@ const PageList = () => {
         <InputLeftElement>
           <Icon name="search" />
         </InputLeftElement>
-        <Input variant="outlined" value={value} onChange={handleChange} />
+        <Input variant="filled" value={value} onChange={handleChange} />
       </InputGroup>
       {pages.map((page) => {
         return <PageListItem key={page._key} page={page} />
