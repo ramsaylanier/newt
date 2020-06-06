@@ -24,7 +24,7 @@
     "apollo-link-http": "^1.5.17",
     "apollo-link-schema": "^1.2.5",
     "apollo-link-ws": "^1.0.20",
-    "apollo-server": "^2.12.0",
+    "apollo-server": "^2.14.2",
     "apollo-server-express": "^2.12.0",
     "apollo-server-micro": "^2.13.1",
     "arangojs": "6",
