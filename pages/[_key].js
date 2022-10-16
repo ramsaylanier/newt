@@ -1,6 +1,5 @@
 import React from 'react'
-import gql from 'graphql-tag'
-import { useQuery } from '@apollo/react-hooks'
+import { useQuery, gql } from '@apollo/client'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Layout from '../shared/layout'
@@ -15,7 +14,7 @@ import {
   Spinner,
   Stack,
   useDisclosure,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import RouterLink from 'next/link'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
@@ -156,7 +155,7 @@ const Page = () => {
               </Flex>
               {isOwner ? (
                 <Badge
-                  variantColor={page.private ? 'orange' : 'green'}
+                  colorScheme={page.private ? 'orange' : 'green'}
                   variant="solid"
                 >
                   {page.private ? 'Private' : 'Public'}

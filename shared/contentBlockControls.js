@@ -11,7 +11,7 @@ import {
   MenuItem,
   Text,
   useDisclosure,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import PageFinder from './pageFinder'
 import { RichUtils } from 'draft-js'
 import { addPageLink, addHttpLink } from '../utils/draftUtil'

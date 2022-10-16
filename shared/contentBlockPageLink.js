@@ -1,6 +1,6 @@
 import React from 'react'
 import RouteLink from 'next/link'
-import { Link } from '@chakra-ui/core'
+import { Link } from '@chakra-ui/react'
 
 export default function ContentBlockPageLink(props) {
   const { entityKey, offsetKey, children } = props

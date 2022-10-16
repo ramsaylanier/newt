@@ -1,6 +1,5 @@
 import React from 'react'
-import gql from 'graphql-tag'
-import { useMutation } from '@apollo/react-hooks'
+import { useMutation, gql } from '@apollo/client'
 import {
   useDisclosure,
   Input,
@@ -12,8 +11,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Text,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 const addMutation = gql`
   mutation CreatePage($title: String!) {
@@ -54,7 +52,7 @@ const CreatePageAction = ({ buttonColor, onCreate }) => {
     <React.Fragment>
       <Button
         onClick={onOpen}
-        variantColor={buttonColor}
+        colorScheme={buttonColor}
         variant="solid"
         rightIcon="small-add"
         fontSize="1em"
@@ -79,7 +77,7 @@ const CreatePageAction = ({ buttonColor, onCreate }) => {
           </ModalBody>
 
           <ModalFooter bg="green.200">
-            <Button variantColor="green" mr={3} onClick={handleCreate}>
+            <Button colorScheme="green" mr={3} onClick={handleCreate}>
               Create
             </Button>
           </ModalFooter>

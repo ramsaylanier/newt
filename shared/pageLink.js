@@ -2,7 +2,7 @@ import React from 'react'
 import { useRouter } from 'next/router'
 
 import RouteLink from 'next/link'
-import { Box, Text, Link } from '@chakra-ui/core'
+import { Box, Text, Link } from '@chakra-ui/react'
 
 export default function PageLink({ link }) {
   const router = useRouter()

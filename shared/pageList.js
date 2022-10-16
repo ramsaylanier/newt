@@ -1,6 +1,5 @@
 import React from 'react'
-import gql from 'graphql-tag'
-import { useQuery } from '@apollo/react-hooks'
+import { useQuery, gql } from '@apollo/client'
 import { useAuth } from '../utils/authClient'
 import {
   Input,
@@ -8,7 +7,7 @@ import {
   InputLeftElement,
   List,
   Icon,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import PageListItem from './pageListItem'
 import useSearchFilters from '../utils/useSearchFilters'
 import usePusher from '../utils/usePusher'

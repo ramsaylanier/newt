@@ -1,11 +1,11 @@
 import React from 'react'
 import Head from 'next/head'
 import Layout from '../shared/layout'
-import { Box, Link, Image } from '@chakra-ui/core'
-import { useQuery } from '@apollo/react-hooks'
+import { Box, Link, Image } from '@chakra-ui/react'
+import { useQuery } from '@apollo/client'
 import PageTitle from '../shared/pageTitle'
 import PageList from '../shared/pageList'
-import gql from 'graphql-tag'
+import { gql } from '@apollo/client'
 
 const query = gql`
   query UserQuery {

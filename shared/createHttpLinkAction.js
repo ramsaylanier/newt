@@ -12,7 +12,7 @@ import {
   Input,
   FormControl,
   FormLabel,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 export default function CreateHttpLinkAction({ isOpen, onClose, onSave }) {
   const [urlValue, setUrlValue] = React.useState('')

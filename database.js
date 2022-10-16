@@ -1,12 +1,15 @@
 const { Database } = require('arangojs')
 
 const host = process.env.DATABASE_HOST
-const name = process.env.DATABASE_NAME
+const databaseName = process.env.DATABASE_NAME
+const username = process.env.DATABASE_USERNAME
 const password = process.env.DATABASE_PASSWORD || ''
 
 const makeDb = async () => {
   const db = new Database({
     url: host,
+    databaseName,
+    auth: { username, password },
   })
 
   try {
@@ -15,12 +18,12 @@ const makeDb = async () => {
       db.useBasicAuth('root', password)
     }
 
-    useDb()
+    // useDb()
     const exists = await db.exists()
 
     if (!exists) {
       db.useDatabase('_system')
-      await db.createDatabase(name, [{ username: 'root' }])
+      await db.createDatabase(name, [{ username }])
       useDb()
     }
 
@@ -31,14 +34,14 @@ const makeDb = async () => {
       pageCollection.create()
     }
 
-    const pageEdgeCollection = db.edgeCollection('PageEdges')
+    const pageEdgeCollection = db.collection('PageEdges')
     const pageEdgeCollectionExists = await pageEdgeCollection.exists()
 
     if (!pageEdgeCollectionExists) {
       pageEdgeCollection.create()
     }
 
-    const searchView = db.arangoSearchView('pageSearch')
+    const searchView = db.view('pageSearch')
     const searchViewExists = await searchView.exists()
 
     if (!searchViewExists) {
@@ -56,7 +59,7 @@ const makeDb = async () => {
         },
       },
     }
-    await searchView.setProperties(viewProps)
+    await searchView.replaceProperties(viewProps)
 
     return db
   } catch (e) {

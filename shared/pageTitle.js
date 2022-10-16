@@ -7,9 +7,8 @@ import {
   InputGroup,
   InputRightElement,
   IconButton,
-} from '@chakra-ui/core'
-import { useMutation } from '@apollo/react-hooks'
-import gql from 'graphql-tag'
+} from '@chakra-ui/react'
+import { useMutation, gql } from '@apollo/client'
 
 const mutation = gql`
   mutation UpdatePageTitle($id: String!, $title: String!) {

@@ -13,9 +13,8 @@ import {
   Link,
   Icon,
   useDisclosure,
-} from '@chakra-ui/core'
-import { useMutation } from '@apollo/react-hooks'
-import gql from 'graphql-tag'
+} from '@chakra-ui/react'
+import { useMutation, gql } from '@apollo/client'
 import { useDrag } from 'react-dnd'
 import { useAuth } from '../utils/authClient'
 
@@ -69,7 +68,7 @@ export default function PageListItem({ page }) {
           </Link>
         </RouteLink>
         {page.private && (
-          <Badge variantColor="orange" mr="2">
+          <Badge colorScheme="orange" mr="2">
             private
           </Badge>
         )}
@@ -100,7 +99,7 @@ export default function PageListItem({ page }) {
               <Button ref={cancelRef} onClick={onClose}>
                 Cancel
               </Button>
-              <Button variantColor="red" onClick={handleDelete} ml={3}>
+              <Button colorScheme="red" onClick={handleDelete} ml={3}>
                 Delete
               </Button>
             </AlertDialogFooter>

@@ -6,7 +6,7 @@ import {
   PopoverArrow,
   PopoverBody,
   Link,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 export default function ContentBlockHttpLink(props) {
   const { entityKey, children, contentState } = props

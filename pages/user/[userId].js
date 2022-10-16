@@ -1,12 +1,11 @@
 import React from 'react'
 import Head from 'next/head'
 import Layout from '../../shared/layout'
-import { Box, Flex, Text, Spinner } from '@chakra-ui/core'
+import { Box, Flex, Text, Spinner } from '@chakra-ui/react'
 import PageListItem from '../../shared/pageListItem'
-import { useQuery } from '@apollo/react-hooks'
+import { useQuery, gql } from '@apollo/client'
 import PageTitle from '../../shared/pageTitle'
 import { useRouter } from 'next/router'
-import gql from 'graphql-tag'
 
 const query = gql`
   query UserQuery($userId: String!) {

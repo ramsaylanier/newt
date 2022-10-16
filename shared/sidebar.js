@@ -8,7 +8,8 @@ import {
   IconButton,
   Link,
   Image,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
+import { GraphIcon } from './icons'
 import CreatePageAction from './createPageAction'
 import { useRouter } from 'next/router'
 import { useAuth } from '../utils/authClient'
@@ -39,15 +40,15 @@ export default function Sidebar() {
       {user ? (
         <React.Fragment>
           <Flex
-            alignItem="center"
+            alignItems="center"
             justifyContent="space-between"
             direction="row"
           >
             <CreatePageAction buttonColor="green" />
             <IconButton
-              icon="graph"
+              icon={<GraphIcon />}
               onClick={handleClick}
-              variantColor="green"
+              colorScheme="green"
               ml="2"
             />
           </Flex>

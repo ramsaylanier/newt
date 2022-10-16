@@ -10,6 +10,7 @@ const getPage = async (f, db) => {
           ${filter}
           RETURN page
         `)
+
     return query.next()
   } catch (e) {
     console.log(e)
@@ -29,7 +30,7 @@ const getGraph = async (graphName, db) => {
 
 const updatePageContent = async (args, db, pusher) => {
   const collection = db.collection('Pages')
-  const edgeCollection = db.edgeCollection('PageEdges')
+  const edgeCollection = db.collection('PageEdges')
 
   try {
     const document = await collection.document(args.id)

@@ -1,13 +1,7 @@
 import React from 'react'
-import { theme as chakraTheme } from '@chakra-ui/core'
+import { extendTheme } from '@chakra-ui/react'
 
-const fonts = { ...chakraTheme.fonts, mono: `'Menlo', monospace` }
-
-const breakpoints = ['30em', '48em', '62em', '80em']
-breakpoints.sm = breakpoints[0]
-breakpoints.md = breakpoints[1]
-breakpoints.lg = breakpoints[2]
-breakpoints.xl = breakpoints[3]
+const fonts = { mono: `'Menlo', monospace` }
 
 const customIcons = {
   bold: {
@@ -81,18 +75,14 @@ const customIcons = {
   },
 }
 
-const theme = {
-  ...chakraTheme,
+const theme = extendTheme({
   colors: {
-    ...chakraTheme.colors,
     black: '#16161D',
   },
   fonts,
-  breakpoints,
   icons: {
-    ...chakraTheme.icons,
     ...customIcons,
   },
-}
+})
 
 export default theme

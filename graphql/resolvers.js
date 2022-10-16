@@ -24,7 +24,7 @@ const resolvers = {
       let filter = `FILTER page.ownerId == '${parent.id}'`
       let limit = ''
       try {
-        const collection = db.collection('pageSearch')
+        const collection = db.view('pageSearch')
         const { filters = [], count = 25, offset = 0 } = args
         filters.forEach((f) => {
           filter += `FILTER ${f.filter}`
@@ -41,7 +41,12 @@ const resolvers = {
           ${limit}
           RETURN page
         `)
-        return query._result || []
+        const pages = []
+        for await (const page of query) {
+          pages.push(page)
+        }
+
+        return pages
       } catch (e) {
         console.log(e)
       }
@@ -49,11 +54,14 @@ const resolvers = {
   },
   Page: {
     edges: async (parent, args, { db }) => {
-      const collection = db.edgeCollection('PageEdges')
+      const collection = db.collection('PageEdges')
       try {
+        console.log({ parent })
         const outEdges = await collection.outEdges(parent._id)
         const inEdges = await collection.inEdges(parent._id)
         const edges = [...outEdges, ...inEdges]
+        console.log({ edges })
+
         return edges
       } catch (e) {
         console.log(e)
@@ -108,18 +116,14 @@ const resolvers = {
   Query: {
     currentUser: (parent, args, { user }) => {
       if (!user) return null
-
       const { sub, ...rest } = user
-
       return {
         id: sub,
         ...rest,
       }
     },
     user: async (parent, args) => {
-      console.log(args.userId)
       const user = await getUserById(args.userId)
-      console.log(user)
       return user
     },
     page: async (parent, args, { db }) => {
@@ -140,9 +144,12 @@ const resolvers = {
           ownerId: user.sub,
         })
         const document = await collection.document(newPage)
-        pusher.trigger('subscription', 'pageAdded', {
-          message: { ...document, __typename: 'Page' },
-        })
+
+        pusher &&
+          pusher.trigger('subscription', 'pageAdded', {
+            message: { ...document, __typename: 'Page' },
+          })
+
         return document
       } catch (e) {
         console.log(e)

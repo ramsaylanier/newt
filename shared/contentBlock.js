@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRouter } from 'next/router'
-import { useMutation } from '@apollo/react-hooks'
-import { Box } from '@chakra-ui/core'
+import { useMutation } from '@apollo/client'
+import { Box } from '@chakra-ui/react'
 import {
   Editor,
   EditorState,

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button } from '@chakra-ui/core'
-import { useQuery, useMutation } from '@apollo/react-hooks'
+import { Button } from '@chakra-ui/react'
+import { useQuery, useMutation } from '@apollo/client'
 import { query as PageQuery } from '../pages/[_key]'
 import { EditorState, SelectionState, Modifier, convertToRaw } from 'draft-js'
 import { updatePageMutation, createPageMutation } from '../graphql/mutations'
@@ -17,7 +17,7 @@ export default function SuggestedPageLink(props) {
     variables: { filter: `page.title == '${entity.text}'` },
   })
   let page = data?.page || null
-  const variantColor = page ? 'green' : 'blue'
+  const colorScheme = page ? 'green' : 'blue'
 
   const handleClick = async () => {
     let contentState = editorState.getCurrentContent()
@@ -67,7 +67,7 @@ export default function SuggestedPageLink(props) {
       isLoading={loading}
       variant="solid"
       loadingText={entity.text}
-      variantColor={variantColor}
+      colorScheme={colorScheme}
       size="sm"
       mr="1"
       onClick={handleClick}

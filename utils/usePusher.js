@@ -1,6 +1,6 @@
 import React from 'react'
 import Pusher from 'pusher-js'
-import { useApolloClient } from '@apollo/react-hooks'
+import { useApolloClient } from '@apollo/client'
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 const pusher = new Pusher(pusherKey, {

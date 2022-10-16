@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverArrow,
   PopoverBody,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 export default function ContentBlockExtensionLink(props) {
   const { block } = props

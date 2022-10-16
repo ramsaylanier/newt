@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRouter } from 'next/router'
-import { useQuery } from '@apollo/react-hooks'
+import { useQuery } from '@apollo/client'
 import {
   Input,
   InputGroup,
@@ -15,7 +15,7 @@ import {
   ModalContent,
   ModalFooter,
   Button,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 import CreatePageAction from './createPageAction'
 import { query } from './pageList'
 
@@ -67,7 +67,7 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
                 <Button
                   key={page._key}
                   variant="outline"
-                  variantColor="black"
+                  colorScheme="black"
                   onClick={() => handleClick(page)}
                   size="sm"
                   mb="2"

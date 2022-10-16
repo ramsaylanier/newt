@@ -1,6 +1,5 @@
 import React from 'react'
-import gql from 'graphql-tag'
-import { useMutation } from '@apollo/react-hooks'
+import { useMutation, gql } from '@apollo/client'
 import {
   Switch,
   Flex,
@@ -13,7 +12,7 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-} from '@chakra-ui/core'
+} from '@chakra-ui/react'
 
 const updatePageMutation = gql`
   mutation UpdatePageSettings($id: String!, $update: GenericScalar) {
@@ -57,7 +56,7 @@ const PageSettingsModal = ({ isOpen, onClose, page }) => {
         </ModalBody>
 
         <ModalFooter bg="green.200">
-          <Button variantColor="green" mr={3} onClick={handleSave}>
+          <Button colorScheme="green" mr={3} onClick={handleSave}>
             Save
           </Button>
         </ModalFooter>
