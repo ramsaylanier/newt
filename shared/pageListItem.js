@@ -11,9 +11,9 @@ import {
   ListItem,
   Button,
   Link,
-  Icon,
   useDisclosure,
 } from '@chakra-ui/react'
+import { DeleteIcon } from '@chakra-ui/icons'
 import { useMutation, gql } from '@apollo/client'
 import { useDrag } from 'react-dnd'
 import { useAuth } from '../utils/authClient'
@@ -74,7 +74,7 @@ export default function PageListItem({ page }) {
         )}
         {isOwner && (
           <Button ref={btnRef} size="xs" onClick={onOpen}>
-            <Icon name="delete" size="12px" />
+            <DeleteIcon />
           </Button>
         )}
       </ListItem>

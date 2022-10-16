@@ -12,6 +12,8 @@ import {
   Text,
   useDisclosure,
 } from '@chakra-ui/react'
+import { LinkIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { HttpIcon, iconMap } from './icons'
 import PageFinder from './pageFinder'
 import { RichUtils } from 'draft-js'
 import { addPageLink, addHttpLink } from '../utils/draftUtil'
@@ -96,7 +98,7 @@ export default function ContentBlockControls(props) {
     <Box className="RichEditor-controls">
       <Flex flexWrap="wrap">
         <Menu>
-          <MenuButton as={Button} rightIcon="chevron-down">
+          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
             {currentTextStyle}
           </MenuButton>
           <MenuList bg="white" fontSize=".9rem">
@@ -114,29 +116,39 @@ export default function ContentBlockControls(props) {
 
         <Divider orientation="vertical" my="2" color="gray.500" />
 
-        {INLINE_STYLES.map((type) => (
-          <StyleIconButton
-            key={type.label}
-            active={currentStyle.has(type.style)}
-            icon={type.label}
-            onToggle={onToggleStyles}
-            style={type.style}
-          />
-        ))}
+        {INLINE_STYLES.map((type) => {
+          const Icon = iconMap[type.label]
+          return (
+            <StyleIconButton
+              key={type.label}
+              active={currentStyle.has(type.style)}
+              icon={<Icon />}
+              onToggle={onToggleStyles}
+              style={type.style}
+            />
+          )
+        })}
 
         <Divider orientation="vertical" my="2" color="gray.500" />
 
-        {BLOCK_TYPES.map((type) => (
-          <StyleIconButton
-            key={type.label}
-            active={type.style === blockType}
-            icon={type.label}
-            onToggle={onToggle}
-            style={type.style}
-          />
-        ))}
-        <IconButton icon="link" onClick={onOpen} />
-        <IconButton icon="http" fontSize="1.8rem" onClick={onHttpLinkOpen} />
+        {BLOCK_TYPES.map((type) => {
+          const Icon = iconMap[type.label]
+          return (
+            <StyleIconButton
+              key={type.label}
+              active={type.style === blockType}
+              icon={<Icon />}
+              onToggle={onToggle}
+              style={type.style}
+            />
+          )
+        })}
+        <IconButton icon={<LinkIcon />} onClick={onOpen} />
+        <IconButton
+          icon={<HttpIcon />}
+          fontSize="1.8rem"
+          onClick={onHttpLinkOpen}
+        />
       </Flex>
 
       <PageFinder

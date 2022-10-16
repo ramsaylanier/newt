@@ -12,6 +12,7 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react'
+import { SmallAddIcon } from '@chakra-ui/icons'
 
 const addMutation = gql`
   mutation CreatePage($title: String!) {
@@ -54,7 +55,7 @@ const CreatePageAction = ({ buttonColor, onCreate }) => {
         onClick={onOpen}
         colorScheme={buttonColor}
         variant="solid"
-        rightIcon="small-add"
+        rightIcon={<SmallAddIcon />}
         fontSize="1em"
       >
         Create Page

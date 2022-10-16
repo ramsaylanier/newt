@@ -5,7 +5,6 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Icon,
   Box,
   Modal,
   ModalBody,
@@ -16,6 +15,7 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
+import { SearchIcon } from '@chakra-ui/icons'
 import CreatePageAction from './createPageAction'
 import { query } from './pageList'
 
@@ -53,7 +53,7 @@ export default function PageFinder({ isOpen, onClose, onSave }) {
 
             <InputGroup mb="2">
               <InputLeftElement>
-                <Icon name="search" />
+                <SearchIcon />
               </InputLeftElement>
               <Input
                 variant="filled"

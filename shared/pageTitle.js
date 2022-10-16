@@ -8,6 +8,7 @@ import {
   InputRightElement,
   IconButton,
 } from '@chakra-ui/react'
+import { EditIcon, CheckIcon, SmallCloseIcon } from '@chakra-ui/icons'
 import { useMutation, gql } from '@apollo/client'
 
 const mutation = gql`
@@ -71,13 +72,13 @@ export default function PageTitle({ title, isOwner }) {
             />
             <InputRightElement width="5rem">
               <IconButton
-                icon="check"
+                icon={<CheckIcon />}
                 h="1.75rem"
                 size="sm"
                 onClick={handleSubmit}
               />
               <IconButton
-                icon="small-close"
+                icon={<SmallCloseIcon />}
                 h="1.75rem"
                 size="sm"
                 onClick={handleCancel}
@@ -95,7 +96,11 @@ export default function PageTitle({ title, isOwner }) {
           >
             {title}
             {isOwner && (
-              <IconButton icon="edit" onClick={handleClick} variant="ghost" />
+              <IconButton
+                icon={<EditIcon />}
+                onClick={handleClick}
+                variant="ghost"
+              />
             )}
           </Text>
         </Flex>

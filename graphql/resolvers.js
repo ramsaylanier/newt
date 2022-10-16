@@ -56,11 +56,9 @@ const resolvers = {
     edges: async (parent, args, { db }) => {
       const collection = db.collection('PageEdges')
       try {
-        console.log({ parent })
         const outEdges = await collection.outEdges(parent._id)
         const inEdges = await collection.inEdges(parent._id)
         const edges = [...outEdges, ...inEdges]
-        console.log({ edges })
 
         return edges
       } catch (e) {

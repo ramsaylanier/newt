@@ -1,13 +1,8 @@
 import React from 'react'
 import { useQuery, gql } from '@apollo/client'
 import { useAuth } from '../utils/authClient'
-import {
-  Input,
-  InputGroup,
-  InputLeftElement,
-  List,
-  Icon,
-} from '@chakra-ui/react'
+import { Input, InputGroup, InputLeftElement, List } from '@chakra-ui/react'
+import { SearchIcon } from '@chakra-ui/icons'
 import PageListItem from './pageListItem'
 import useSearchFilters from '../utils/useSearchFilters'
 import usePusher from '../utils/usePusher'
@@ -97,7 +92,7 @@ const PageList = () => {
     <List>
       <InputGroup mb="2">
         <InputLeftElement>
-          <Icon name="search" />
+          <SearchIcon />
         </InputLeftElement>
         <Input variant="filled" value={value} onChange={handleChange} />
       </InputGroup>

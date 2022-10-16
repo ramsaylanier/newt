@@ -15,6 +15,7 @@ import {
   Stack,
   useDisclosure,
 } from '@chakra-ui/react'
+import { SettingsIcon, LockIcon, UnlockIcon } from '@chakra-ui/icons'
 import RouterLink from 'next/link'
 import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
@@ -140,9 +141,9 @@ const Page = () => {
                 <PageTitle title={page.title} isOwner={isOwner} />
                 {isOwner && (
                   <Stack isInline spacing={4} align="center">
-                    <IconButton icon="settings" onClick={onOpen} />
+                    <IconButton icon={<SettingsIcon />} onClick={onOpen} />
                     <IconButton
-                      icon={isLocked ? 'lock' : 'unlock'}
+                      icon={isLocked ? <LockIcon /> : <UnlockIcon />}
                       onClick={handleLock}
                     />
                     <PageSettingsModal
