@@ -6,6 +6,12 @@ export const createPageMutation = gql`
       _id
       _key
       title
+      lastEdited
+      private
+      owner {
+        id
+        nickname
+      }
     }
   }
 `

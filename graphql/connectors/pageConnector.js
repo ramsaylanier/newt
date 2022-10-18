@@ -29,10 +29,9 @@ const getGraph = async (graphName, db) => {
 }
 
 const updatePageContent = async (args, db, pusher) => {
-  const collection = db.collection('Pages')
-  const edgeCollection = db.collection('PageEdges')
-
   try {
+    const collection = await db.collection('Pages')
+    const edgeCollection = await db.collection('PageEdges')
     const document = await collection.document(args.id)
     const update = await collection.update(document._key, {
       content: args.content,
@@ -71,20 +70,19 @@ const updatePageContent = async (args, db, pusher) => {
       return links
     }, [])
 
-    const existingLinks = await edgeCollection.outEdges(`Pages/${args.id}`)
-    existingLinks.forEach((existingLink) => {
-      const contentLink = linksFromContent.find(
-        (l) => l.pageKey === existingLinks._key
-      )
+    // update edges
+    const { edges } = await edgeCollection.outEdges(`Pages/${args.id}`)
+    edges.forEach((edge) => {
+      const contentLink = linksFromContent.find((l) => l.pageKey === edge._key)
       if (contentLink) {
-        edgeCollection.update(existingLink._key, {
+        edgeCollection.update(edges._key, {
           blockKey: contentLink.blockKeys,
         })
         linksFromContent = linksFromContent.filter(
           (l) => l.pageKey !== contentLink.pageKey
         )
       } else {
-        edgeCollection.remove(existingLink._id)
+        edgeCollection.remove(edges._id)
       }
     })
 
@@ -114,9 +112,9 @@ const updatePageContent = async (args, db, pusher) => {
       }
     })
 
-    return collection.document(newDocument)
+    return await collection.document(newDocument)
   } catch (e) {
-    console.log(e)
+    console.trace(e)
   }
 }
 

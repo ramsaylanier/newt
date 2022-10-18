@@ -38,7 +38,7 @@ const makeDb = async () => {
     const pageEdgeCollectionExists = await pageEdgeCollection.exists()
 
     if (!pageEdgeCollectionExists) {
-      pageEdgeCollection.create()
+      db.createEdgeCollection('PageEdges')
     }
 
     const searchView = db.view('pageSearch')

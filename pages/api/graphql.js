@@ -4,6 +4,7 @@ import resolvers from '../../graphql/resolvers'
 import makeDb from '../../database'
 import Pusher from 'pusher'
 import { getSession } from '@auth0/nextjs-auth0'
+import pusherPlugin from '../../utils/pusherPlugin'
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 const pusherSecret = process.env.PUSHER_SECRET
@@ -32,6 +33,10 @@ const server = new createServer({
       console.log(e)
     }
   },
+  plugins: [
+    // ... other plugins
+    pusherPlugin,
+  ],
 })
 
 export const config = {

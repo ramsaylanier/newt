@@ -4,8 +4,8 @@ import { useAuth } from '../utils/authClient'
 import { Input, InputGroup, InputLeftElement, List } from '@chakra-ui/react'
 import { SearchIcon } from '@chakra-ui/icons'
 import PageListItem from './pageListItem'
-import useSearchFilters from '../utils/useSearchFilters'
-import usePusher from '../utils/usePusher'
+import useSearchFilters from './hooks/useSearchFilters'
+import usePusher from './hooks/usePusher'
 import { query as PageQuery } from '../pages/[_key]'
 
 export const query = gql`
@@ -31,8 +31,13 @@ const PageList = () => {
 
   usePusher('pageAdded', ({ client, data }) => {
     let { currentUser } = client.readQuery({ query, variables })
-    currentUser.pages = [data, ...currentUser.pages]
-    client.writeQuery({ query, variables, data: { currentUser } })
+    client.writeQuery({
+      query,
+      variables,
+      data: {
+        currentUser: { ...currentUser, pages: [data, ...currentUser.pages] },
+      },
+    })
   })
 
   usePusher('pageDeleted', () => {

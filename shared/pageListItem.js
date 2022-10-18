@@ -40,6 +40,7 @@ export default function PageListItem({ page }) {
     onClose()
     deletePage({ variables: { id: page._id } })
   }
+
   const isOwner = page.owner ? page.owner.id === user?.sub : false
 
   return (

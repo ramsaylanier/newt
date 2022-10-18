@@ -1,5 +1,7 @@
 import React from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { useMutation } from '@apollo/client'
+import { createPageMutation } from '../graphql/mutations'
+
 import {
   useDisclosure,
   Input,
@@ -14,27 +16,10 @@ import {
 } from '@chakra-ui/react'
 import { SmallAddIcon } from '@chakra-ui/icons'
 
-const addMutation = gql`
-  mutation CreatePage($title: String!) {
-    createPage(title: $title) {
-      _id
-      _key
-      title
-      lastEdited
-    }
-  }
-`
-
-const CreatePageAction = ({ buttonColor, onCreate }) => {
+const CreatePageAction = ({ buttonColor }) => {
   const [title, setTitle] = React.useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [createPage, { data }] = useMutation(addMutation)
-
-  React.useEffect(() => {
-    if (data && onCreate) {
-      onCreate(data.createPage)
-    }
-  }, [data])
+  const [createPage] = useMutation(createPageMutation)
 
   const handleCreate = (e) => {
     e.preventDefault()

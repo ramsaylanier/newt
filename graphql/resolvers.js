@@ -1,22 +1,13 @@
 import {
-  convertFromRaw,
-  Modifier,
-  ContentBlock,
-  SelectionState,
-  convertToRaw,
-  genKey,
-} from 'draft-js'
-import { List } from 'immutable'
+  PageFieldResolvers,
+  PageQueryResolvers,
+  PageMutationResolvers,
+} from './resolvers/pageResolvers.js'
 
-const { aql } = require('arangojs')
-const {
-  getPage,
-  getGraph,
-  updatePageContent,
-  updatePageSettings,
-} = require('./connectors/pageConnector.js')
-const { getUserById } = require('./connectors/authConnector.js')
-const uniq = require('lodash/uniq')
+import { getPage, getGraph } from './connectors/pageConnector.js'
+import { getUserById } from './connectors/authConnector.js'
+import { aql } from 'arangojs'
+import { uniq } from 'lodash'
 
 const resolvers = {
   User: {
@@ -41,6 +32,7 @@ const resolvers = {
           ${limit}
           RETURN page
         `)
+
         const pages = []
         for await (const page of query) {
           pages.push(page)
@@ -52,25 +44,7 @@ const resolvers = {
       }
     },
   },
-  Page: {
-    edges: async (parent, args, { db }) => {
-      const collection = db.collection('PageEdges')
-      try {
-        const outEdges = await collection.outEdges(parent._id)
-        const inEdges = await collection.inEdges(parent._id)
-        const edges = [...outEdges, ...inEdges]
-
-        return edges
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    owner: async (parent) => {
-      const ownerId = parent.ownerId
-      const owner = await getUserById(ownerId)
-      return owner
-    },
-  },
+  Page: PageFieldResolvers,
   PageEdge: {
     from: async (parent, args, { db }) => {
       try {
@@ -124,108 +98,13 @@ const resolvers = {
       const user = await getUserById(args.userId)
       return user
     },
-    page: async (parent, args, { db }) => {
-      return getPage(args.filter, db)
-    },
+    ...PageQueryResolvers,
     graph: async (parent, args, { db }) => {
       return getGraph(args.name, db)
     },
   },
   Mutation: {
-    createPage: async (parent, args, { db, pusher, user }) => {
-      const collection = db.collection('Pages')
-      if (!user) return
-      try {
-        const newPage = await collection.save({
-          title: args.title,
-          lastEdited: new Date(),
-          ownerId: user.sub,
-        })
-        const document = await collection.document(newPage)
-
-        pusher &&
-          pusher.trigger('subscription', 'pageAdded', {
-            message: { ...document, __typename: 'Page' },
-          })
-
-        return document
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    deletePage: async (parent, args, { db, pusher, user }) => {
-      if (!user) return null
-      const collection = db.collection('Pages')
-      try {
-        const document = await collection.document(args.id)
-
-        if (document.ownerId !== user.sub) {
-          throw Error("You aren't the owner")
-        }
-
-        collection.remove(document._key)
-        pusher.trigger('subscription', 'pageDeleted', {
-          message: { ...document, __typename: 'Page' },
-        })
-        return document
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    updatePageTitle: async (parent, args, { db }) => {
-      const collection = db.collection('Pages')
-      try {
-        const document = await collection.document(args.id)
-        const update = await collection.update(document._key, {
-          title: args.title,
-        })
-        const newDocument = await collection.document(update)
-        return newDocument
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    updatePageContent: async (parent, args, { db, pusher }) => {
-      return updatePageContent(args, db, pusher)
-    },
-    updatePageSettings: async (parent, args, { db, user }) => {
-      return updatePageSettings(args, db, user)
-    },
-    addSelectionToPageContent: async (parent, args, { db, pusher }) => {
-      try {
-        const { selection, pageId, source } = args
-        const page = await getPage(`page._id == '${args.pageId}'`, db)
-        const newBlock = new ContentBlock({
-          key: genKey(),
-          type: 'fromExtension',
-          text: '',
-          data: {
-            source,
-          },
-          characterList: List(),
-        })
-        page.content.blocks.push(newBlock)
-        const contentState = convertFromRaw(page.content)
-        const selectionState = SelectionState.createEmpty(newBlock.key)
-        const updatedContentState = Modifier.insertText(
-          contentState,
-          selectionState,
-          selection
-        )
-        const content = convertToRaw(updatedContentState)
-
-        const update = await updatePageContent(
-          { content, id: pageId },
-          db,
-          pusher
-        )
-        pusher.trigger('subscription', 'contentAddedFromLinker', {
-          message: { ...update, __typename: 'Page' },
-        })
-      } catch (e) {
-        console.log(e)
-      }
-    },
+    ...PageMutationResolvers,
     createPageEdge: async (parent, args, { db }) => {
       const { source, target, blockKey } = args
       const collection = db.edgeCollection('PageEdges')
