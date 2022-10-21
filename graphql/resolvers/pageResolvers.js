@@ -18,12 +18,9 @@ import {
 
 export const PageFieldResolvers = {
   edges: async (parent, args, { db }) => {
-    const collection = db.collection('PageEdges')
     try {
-      const outEdges = await collection.outEdges(parent._id)
-      const inEdges = await collection.inEdges(parent._id)
-      const edges = [...outEdges, ...inEdges]
-
+      const collection = await db.collection('PageEdges')
+      const { edges } = await collection.edges(parent._id)
       return edges
     } catch (e) {
       console.log(e)

@@ -15,15 +15,3 @@ export const createPageMutation = gql`
     }
   }
 `
-
-export const updatePageMutation = gql`
-  mutation UpdatePageContent($id: String!, $content: GenericScalar) {
-    updatePageContent(id: $id, content: $content) {
-      _id
-      _key
-      title
-      content
-      lastEdited
-    }
-  }
-`

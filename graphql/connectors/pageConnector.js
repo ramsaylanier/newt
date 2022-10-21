@@ -72,17 +72,18 @@ const updatePageContent = async (args, db, pusher) => {
 
     // update edges
     const { edges } = await edgeCollection.outEdges(`Pages/${args.id}`)
+
     edges.forEach((edge) => {
       const contentLink = linksFromContent.find((l) => l.pageKey === edge._key)
       if (contentLink) {
-        edgeCollection.update(edges._key, {
+        edgeCollection.update(edge._key, {
           blockKey: contentLink.blockKeys,
         })
         linksFromContent = linksFromContent.filter(
           (l) => l.pageKey !== contentLink.pageKey
         )
       } else {
-        edgeCollection.remove(edges._id)
+        edgeCollection.remove(edge._id)
       }
     })
 
