@@ -1,5 +1,5 @@
 import React from 'react'
-import { useMutation, gql } from '@apollo/client'
+
 import {
   Switch,
   Flex,
@@ -13,28 +13,20 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react'
-
-const updatePageMutation = gql`
-  mutation UpdatePageSettings($id: String!, $update: GenericScalar) {
-    updatePageSettings(id: $id, update: $update) {
-      _id
-      _key
-      title
-      private
-    }
-  }
-`
+import useUpdatePageContent from './hooks/useUpdatePageContent'
 
 const PageSettingsModal = ({ isOpen, onClose, page }) => {
   const [isPrivate, setIsPrivate] = React.useState(page.private)
-  const [updatePage] = useMutation(updatePageMutation)
+  const { updatePageContent } = useUpdatePageContent()
 
   const handleChange = () => {
     setIsPrivate(!isPrivate)
   }
 
   const handleSave = () => {
-    updatePage({ variables: { id: page._id, update: { private: isPrivate } } })
+    updatePageContent({
+      variables: { id: page._id, update: { private: isPrivate } },
+    })
     onClose()
   }
   return (
