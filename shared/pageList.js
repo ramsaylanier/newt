@@ -1,7 +1,13 @@
 import React from 'react'
 import { useQuery, gql } from '@apollo/client'
 import { useAuth } from '../utils/authClient'
-import { Input, InputGroup, InputLeftElement, List } from '@chakra-ui/react'
+import {
+  Input,
+  InputGroup,
+  InputLeftElement,
+  List,
+  Spinner,
+} from '@chakra-ui/react'
 import { SearchIcon } from '@chakra-ui/icons'
 import PageListItem from './pageListItem'
 import useSearchFilters from './hooks/useSearchFilters'
@@ -49,21 +55,25 @@ const PageList = () => {
     if (toKey) {
       const filter = `page._id == 'Pages/${toKey}'`
       try {
-        const result = client.readQuery({
+        const { page } = client.readQuery({
           query: PageQuery,
           variables,
         })
-        if (result) {
-          const newEdge = { ...data.pageEdgeAdded, __typename: 'PageEdge' }
-          result.page.edges.push(newEdge)
+
+        if (page) {
           client.writeQuery({
             query: PageQuery,
             variables: { ...variables, filter },
-            data: result,
+            data: {
+              page: {
+                ...page,
+                edges: [data, ...page.edges],
+              },
+            },
           })
         }
       } catch (e) {
-        //
+        console.log(e)
       }
     }
   })
@@ -80,12 +90,13 @@ const PageList = () => {
 
   const variables = { filters }
 
-  const { data, error, refetch } = useQuery(query, {
+  const { data, error, loading, refetch } = useQuery(query, {
     variables,
     skip: !user,
   })
 
   if (error) throw error
+  if (loading) return <Spinner />
 
   const pages = data?.currentUser?.pages || []
 
