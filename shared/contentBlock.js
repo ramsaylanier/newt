@@ -1,7 +1,8 @@
 import React from 'react'
 import { useRouter } from 'next/router'
-import { useMutation } from '@apollo/client'
+
 import { Box } from '@chakra-ui/react'
+import SuggestedPageLinks from './suggestedPageLinks'
 import {
   Editor,
   EditorState,
@@ -12,13 +13,13 @@ import {
 } from 'draft-js'
 import { addPageLink, decorator, blockRendererFn } from '../utils/draftUtil'
 import ContentBlockControls from './contentBlockControls'
-import SuggestedPageLinks from './suggestedPageLinks'
+
 import debounce from 'lodash/debounce'
 import isEqual from 'lodash/isEqual'
 import { useDrop } from 'react-dnd'
 import { getEntitiesFromText } from '../utils/adaptApi'
-import { updatePageMutation } from '../graphql/mutations'
 import { useAuth } from '../utils/authClient'
+import useUpdatePageContent from './hooks/useUpdatePageContent'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
@@ -32,7 +33,7 @@ export default function ContentBlock({
   const router = useRouter()
   const { user } = useAuth()
   const { _key } = router.query
-  const [updatePageContent] = useMutation(updatePageMutation)
+  const { updatePageContent } = useUpdatePageContent()
   const [suggestedPageLinks, setSuggestedPageLinks] = React.useState([])
   const editorRef = React.useRef(null)
   const isOwner = user && page ? user.sub === page.owner.id : false

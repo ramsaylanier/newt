@@ -14,9 +14,9 @@ import {
 } from '@chakra-ui/react'
 import { LinkIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { HttpIcon, iconMap } from './icons'
-import PageFinder from './pageFinder'
 import { RichUtils } from 'draft-js'
 import { addPageLink, addHttpLink } from '../utils/draftUtil'
+import CreatePageLinkAction from './createPageLinkAction'
 import CreateHttpLinkAction from './createHttpLinkAction'
 
 const TEXT_TYPES = [
@@ -151,7 +151,7 @@ export default function ContentBlockControls(props) {
         />
       </Flex>
 
-      <PageFinder
+      <CreatePageLinkAction
         isOpen={isOpen}
         onClose={onClose}
         onSave={handleAddPageLink}
