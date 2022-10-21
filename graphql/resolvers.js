@@ -63,15 +63,17 @@ const resolvers = {
     excerpt: async (parent, args, { db }) => {
       const collection = db.collection('Pages')
       try {
-        const query = await db.query(aql`
+        const cursor = await db.query(aql`
           FOR page IN ${collection}
+          FILTER page._id == ${parent._from}
             LET blocks = page.content.blocks || []
             FOR b in blocks
               LET block = b || {}
               FILTER block.key IN ${parent.blockKeys || []}
               RETURN block 
         `)
-        return query._result.map((r) => r.text)
+        const results = await cursor.all()
+        return results.map((r) => r.text)
       } catch (e) {
         console.log(e)
       }
@@ -143,19 +145,6 @@ const resolvers = {
       }
     },
   },
-  // Subscription: {
-  //   pageAdded: {
-  //     subscribe: (parent, args, context) => {
-  //       return pubSub.asyncIterator(['pageAdded'])
-  //     },
-  //   },
-  //   // pageDeleted: {
-  //   //   subscribe: () => pubSub.asyncIterator(['pageDeleted']),
-  //   // },
-  //   // pageEdgeAdded: {
-  //   //   subscribe: () => pubSub.asyncIterator(['pageEdgeAdded']),
-  //   // },
-  // },
 }
 
 export default resolvers
