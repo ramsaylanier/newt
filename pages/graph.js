@@ -1,7 +1,7 @@
 import React from 'react'
 import Head from 'next/head'
 import Layout from '../shared/layout'
-import { Box } from '@chakra-ui/react'
+import { Box, Spinner } from '@chakra-ui/react'
 import { useQuery, gql } from '@apollo/client'
 import { drag } from 'd3-drag'
 import { forceSimulation, forceLink, forceCollide } from 'd3-force'
@@ -9,6 +9,7 @@ import { select, event } from 'd3-selection'
 import { zoom, zoomIdentity } from 'd3-zoom'
 import theme from '../theme'
 import { useRouter } from 'next/router'
+import { GRAPH_NAME } from '../database'
 
 let simulation, node, nodeMenu, link, label, activeNode
 
@@ -48,8 +49,8 @@ export default function Graph() {
   const zoomRef = React.useRef(null)
   const [offset, setOffset] = React.useState({ x: 0, y: 0, k: 1 })
 
-  const { data } = useQuery(query, {
-    variables: { name: 'pages_graph' },
+  const { data, loading } = useQuery(query, {
+    variables: { name: GRAPH_NAME },
   })
 
   let nodes = data?.graph?.nodes || []
@@ -88,7 +89,7 @@ export default function Graph() {
     nodeMenu = select(zoomRef.current)
       .append('circle')
       .attr('class', 'menu')
-      .attr('r', 20)
+      .attr('r', 0)
 
     node = select(zoomRef.current)
       .append('g')
@@ -246,6 +247,7 @@ export default function Graph() {
       nodeMenu
         .attr('cx', () => activeGraphNode.x)
         .attr('cy', () => activeGraphNode.y)
+        .attr('r', 20)
     }
   }
 
@@ -313,6 +315,8 @@ export default function Graph() {
 
       <Layout>
         <Box width="100%" height="100%" ref={rootRef}>
+          {loading && <Spinner />}
+
           <svg ref={svgRef} width={width || 0} height={height || 0}>
             <g
               ref={zoomRef}

@@ -1,5 +1,5 @@
-const { aql } = require('arangojs')
-const forEach = require('lodash/forEach')
+import { aql } from 'arangojs'
+import { forEach } from 'lodash'
 
 const getPage = async (f, db) => {
   const collection = db.collection('Pages')
@@ -18,13 +18,33 @@ const getPage = async (f, db) => {
 }
 
 const getGraph = async (graphName, db) => {
-  const graph = await db.graph(graphName)
-  const edges = await graph.edgeCollection('PageEdges').all()
-  const nodes = await graph.vertexCollection('Pages').all()
-  return {
-    name: graphName,
-    edges: edges._result,
-    nodes: nodes._result,
+  try {
+    const graph = await db.graph(graphName)
+    const { collection: edgeCollection } = await graph.edgeCollection(
+      'PageEdges'
+    )
+    const { collection: nodeCollection } = await graph.vertexCollection('Pages')
+    const edgeCursor = await db.query(
+      aql`
+        FOR doc IN ${edgeCollection}
+        RETURN doc
+      `
+    )
+    const nodesCursor = await db.query(
+      aql`
+        FOR doc IN ${nodeCollection}
+        RETURN doc
+      `
+    )
+    const edges = edgeCursor.all()
+    const nodes = nodesCursor.all()
+    return {
+      name: graphName,
+      edges,
+      nodes,
+    }
+  } catch (e) {
+    console.log(e)
   }
 }
 

@@ -1,7 +1,7 @@
 import { createServer } from '@graphql-yoga/node'
 import typeDefs from '../../graphql/typeDefs'
 import resolvers from '../../graphql/resolvers'
-import makeDb from '../../database'
+import { makeDb } from '../../database'
 import Pusher from 'pusher'
 import { getSession } from '@auth0/nextjs-auth0'
 import pusherPlugin from '../../utils/pusherPlugin'
@@ -17,6 +17,7 @@ var pusher = new Pusher({
   encrypted: true,
 })
 
+const database = await makeDb()
 const server = new createServer({
   schema: {
     typeDefs,
@@ -25,7 +26,7 @@ const server = new createServer({
   endpoint: '/api/graphql',
   context: async (ctx) => {
     try {
-      const db = await makeDb()
+      const db = database
       const session = await getSession(ctx.req, ctx.res)
       const user = session ? session.user : null
       return { ...ctx, db, pusher, user }

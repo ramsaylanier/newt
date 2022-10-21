@@ -1,11 +1,13 @@
-const { Database } = require('arangojs')
+import { Database } from 'arangojs'
 
 const host = process.env.DATABASE_HOST
 const databaseName = process.env.DATABASE_NAME
 const username = process.env.DATABASE_USERNAME
 const password = process.env.DATABASE_PASSWORD || ''
 
-const makeDb = async () => {
+export const GRAPH_NAME = 'pagesGraph'
+
+export const makeDb = async () => {
   const db = new Database({
     url: host,
     databaseName,
@@ -61,10 +63,21 @@ const makeDb = async () => {
     }
     await searchView.replaceProperties(viewProps)
 
+    const graph = db.graph(GRAPH_NAME)
+    const graphExists = await graph.exists()
+
+    if (!graphExists) {
+      graph.create([
+        {
+          collection: 'PageEdges',
+        },
+      ])
+
+      graph.addVertexCollection('Pages')
+    }
+
     return db
   } catch (e) {
     console.log('ERRRROR', e)
   }
 }
-
-module.exports = makeDb
