@@ -4,6 +4,7 @@ import {
   updatePageContent,
   updatePageSettings,
 } from '../connectors/pageConnector.js'
+import { aql } from 'arangojs'
 
 import { List } from 'immutable'
 
@@ -17,11 +18,24 @@ import {
 } from 'draft-js'
 
 export const PageFieldResolvers = {
-  edges: async (parent, args, { db }) => {
+  edges: async (parent, args, { db, user }) => {
     try {
       const collection = await db.collection('PageEdges')
-      const { edges } = await collection.edges(parent._id)
-      return edges
+      console.log({ collection })
+      const cursor = await db.query(aql`
+        FOR edge IN ${collection}
+        FILTER edge._to == ${parent._id} && edge._to
+          FOR page IN Pages FILTER page._id == edge._from
+          RETURN {edge, page}
+      `)
+
+      const result = await cursor.all()
+
+      return result
+        .filter((r) => {
+          return r.page.ownerId === user.sub || !r.page.private
+        })
+        .map((r) => r.edge)
     } catch (e) {
       console.log(e)
     }
@@ -34,8 +48,8 @@ export const PageFieldResolvers = {
 }
 
 export const PageQueryResolvers = {
-  page: async (parent, args, { db }) => {
-    return getPage(args.filter, db)
+  page: async (parent, args, { db, user }) => {
+    return getPage(args.filter, db, user)
   },
 }
 
@@ -90,10 +104,10 @@ export const PageMutationResolvers = {
   updatePageSettings: async (parent, args, { db, user }) => {
     return updatePageSettings(args, db, user)
   },
-  addSelectionToPageContent: async (parent, args, { db, pusher }) => {
+  addSelectionToPageContent: async (parent, args, { db, pusher, user }) => {
     try {
       const { selection, pageId, source } = args
-      const page = await getPage(`page._id == '${args.pageId}'`, db)
+      const page = await getPage(`page._id == '${args.pageId}'`, db, user)
       const newBlock = new ContentBlock({
         key: genKey(),
         type: 'fromExtension',

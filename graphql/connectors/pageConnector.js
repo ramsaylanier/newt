@@ -1,43 +1,53 @@
 import { aql } from 'arangojs'
 import { forEach } from 'lodash'
 
-const getPage = async (f, db) => {
+const getPage = async (filter, db, user) => {
   const collection = db.collection('Pages')
+
   try {
-    const filter = aql.literal(`FILTER ${f}`)
-    const query = await db.query(aql`
+    const cursor = await db.query(aql`
           FOR page IN ${collection}
-          ${filter}
-          RETURN page
+          FILTER ${aql.literal(filter)}
+            RETURN page
         `)
 
-    return query.next()
+    const result = cursor.next()
+
+    if (!result.private || result.ownerId === user.sub) {
+      return result
+    } else {
+      throw Error('No access')
+    }
   } catch (e) {
     console.log(e)
   }
 }
 
-const getGraph = async (graphName, db) => {
+const getGraph = async (graphName, db, user) => {
   try {
     const graph = await db.graph(graphName)
     const { collection: edgeCollection } = await graph.edgeCollection(
       'PageEdges'
     )
     const { collection: nodeCollection } = await graph.vertexCollection('Pages')
-    const edgeCursor = await db.query(
-      aql`
-        FOR doc IN ${edgeCollection}
-        RETURN doc
-      `
-    )
     const nodesCursor = await db.query(
       aql`
-        FOR doc IN ${nodeCollection}
-        RETURN doc
+      FOR node IN ${nodeCollection}
+      FILTER node.ownerId == ${user.sub} || !node.private
+      RETURN node
       `
     )
-    const edges = edgeCursor.all()
-    const nodes = nodesCursor.all()
+    const nodes = await nodesCursor.all()
+    const nodeIds = nodes.map((n) => n._id)
+    const edgeCursor = await db.query(
+      aql`
+          FOR edge IN ${edgeCollection}
+          FILTER edge._from IN ${nodeIds} && edge._to IN ${nodeIds}
+            RETURN edge
+        `
+    )
+    const edges = await edgeCursor.all()
+
     return {
       name: graphName,
       edges,

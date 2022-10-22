@@ -70,10 +70,10 @@ export const makeDb = async () => {
       graph.create([
         {
           collection: 'PageEdges',
+          from: ['Pages'],
+          to: ['Pages'],
         },
       ])
-
-      graph.addVertexCollection('Pages')
     }
 
     return db

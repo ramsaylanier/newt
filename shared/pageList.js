@@ -36,7 +36,6 @@ const PageList = () => {
   const { user } = useAuth()
 
   usePusher('pageAdded', ({ client, data }) => {
-    console.log({ client, data })
     let { currentUser } = client.readQuery({ query, variables })
     client.writeQuery({
       query,
@@ -48,7 +47,6 @@ const PageList = () => {
   })
 
   usePusher('pageDeleted', () => {
-    console.log('PAGE DELETED')
     refetch()
   })
 
@@ -101,8 +99,6 @@ const PageList = () => {
   if (loading) return <Spinner />
 
   const pages = data?.currentUser?.pages || []
-
-  console.log({ pages })
 
   const handleChange = (e) => {
     setValue(e.target.value)

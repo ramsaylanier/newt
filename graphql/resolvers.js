@@ -46,16 +46,16 @@ const resolvers = {
   },
   Page: PageFieldResolvers,
   PageEdge: {
-    from: async (parent, args, { db }) => {
+    from: async (parent, args, { db, user }) => {
       try {
-        return getPage(`page._id == '${parent._from}'`, db)
+        return getPage(`page._id == '${parent._from}'`, db, user)
       } catch (e) {
         console.log(e)
       }
     },
-    to: async (parent, args, { db }) => {
+    to: async (parent, args, { db, user }) => {
       try {
-        return getPage(`page._id == '${parent._to}'`, db)
+        return getPage(`page._id == '${parent._to}'`, db, user)
       } catch (e) {
         console.log(e)
       }
@@ -79,14 +79,6 @@ const resolvers = {
       }
     },
   },
-  Graph: {
-    nodes: async (parent) => {
-      return parent.nodes
-    },
-    edges: async (parent) => {
-      return parent.edges
-    },
-  },
   Query: {
     currentUser: (parent, args, { user }) => {
       if (!user) return null
@@ -101,8 +93,8 @@ const resolvers = {
       return user
     },
     ...PageQueryResolvers,
-    graph: async (parent, args, { db }) => {
-      return getGraph(args.name, db)
+    graph: async (parent, args, { db, user }) => {
+      return getGraph(args.name, db, user)
     },
   },
   Mutation: {

@@ -49,11 +49,6 @@ export const query = gql`
           _key
           title
         }
-        to {
-          _id
-          _key
-          title
-        }
       }
     }
   }
@@ -103,7 +98,7 @@ const Page = () => {
   if (error) throw error
 
   const page = data?.page || null
-  const toLinks = page?.edges?.filter((edge) => edge?.to?._key === _key) || []
+  const toLinks = page?.edges
   const lastEdited = page?.lastEdited
     ? new Date(page.lastEdited).toLocaleString('en-GB')
     : ''
