@@ -21,10 +21,9 @@ export const PageFieldResolvers = {
   edges: async (parent, args, { db, user }) => {
     try {
       const collection = await db.collection('PageEdges')
-      console.log({ collection })
       const cursor = await db.query(aql`
         FOR edge IN ${collection}
-        FILTER edge._to == ${parent._id} && edge._to
+        FILTER edge._to == ${parent._id}
           FOR page IN Pages FILTER page._id == edge._from
           RETURN {edge, page}
       `)

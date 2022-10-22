@@ -14,14 +14,12 @@ const usePusher = (messageType, callback, deps = []) => {
     channel.bind(
       messageType,
       function (data) {
-        console.log({ data })
         callback({ client, data: data.message })
       },
       [messageType]
     )
 
     return () => {
-      console.log('UNSUBSCRIBE')
       return channel.unsubscribe('subscription')
     }
   }, deps)
