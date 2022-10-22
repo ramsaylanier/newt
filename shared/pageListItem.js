@@ -14,18 +14,10 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
-import { useMutation, gql } from '@apollo/client'
 import { useDrag } from 'react-dnd'
 import { useAuth } from '../utils/authClient'
+import useDeletePage from './hooks/useDeletePage'
 
-const deleteMutation = gql`
-  mutation DeletePage($id: String!) {
-    deletePage(id: $id) {
-      _id
-      ownerId
-    }
-  }
-`
 export default function PageListItem({ page }) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const btnRef = React.useRef()
@@ -35,10 +27,10 @@ export default function PageListItem({ page }) {
     item: { page, type: 'Page' },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   })
-  const [deletePage] = useMutation(deleteMutation)
+  const { mutation: deletePage } = useDeletePage()
   const handleDelete = () => {
+    deletePage({ page })
     onClose()
-    deletePage({ variables: { id: page._id } })
   }
 
   const isOwner = page.owner ? page.owner.id === user?.sub : false

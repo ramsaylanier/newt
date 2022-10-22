@@ -2,20 +2,8 @@ import { createServer } from '@graphql-yoga/node'
 import typeDefs from '../../graphql/typeDefs'
 import resolvers from '../../graphql/resolvers'
 import { makeDb } from '../../database'
-import Pusher from 'pusher'
 import { getSession } from '@auth0/nextjs-auth0'
-import pusherPlugin from '../../utils/pusherPlugin'
-
-const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
-const pusherSecret = process.env.PUSHER_SECRET
-
-var pusher = new Pusher({
-  appId: '1000613',
-  key: pusherKey,
-  secret: pusherSecret,
-  cluster: 'us2',
-  encrypted: true,
-})
+import pusherPlugin, { pusher } from '../../utils/pusherPlugin'
 
 const database = await makeDb()
 const server = new createServer({
@@ -34,10 +22,7 @@ const server = new createServer({
       console.log(e)
     }
   },
-  plugins: [
-    // ... other plugins
-    pusherPlugin,
-  ],
+  plugins: [pusherPlugin],
 })
 
 export const config = {

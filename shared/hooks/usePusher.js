@@ -3,23 +3,27 @@ import Pusher from 'pusher-js'
 import { useApolloClient } from '@apollo/client'
 
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
-const pusher = new Pusher(pusherKey, {
-  cluster: 'us2',
-})
-const channel = pusher.subscribe('subscription')
 
 const usePusher = (messageType, callback, deps = []) => {
   const client = useApolloClient()
   React.useEffect(() => {
+    const pusher = new Pusher(pusherKey, {
+      cluster: 'us2',
+    })
+    const channel = pusher.subscribe('subscription')
     channel.bind(
       messageType,
-      function ({ message }) {
-        callback({ client, data: message })
+      function (data) {
+        console.log({ data })
+        callback({ client, data: data.message })
       },
       [messageType]
     )
 
-    return () => channel.unbind(messageType)
+    return () => {
+      console.log('UNSUBSCRIBE')
+      return channel.unsubscribe('subscription')
+    }
   }, deps)
 }
 

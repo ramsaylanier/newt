@@ -13,18 +13,18 @@ import {
   ModalBody,
   ModalCloseButton,
 } from '@chakra-ui/react'
-import useUpdatePageContent from './hooks/useUpdatePageContent'
+import useUpdatePageSettings from './hooks/useUpdatePageSettings'
 
 const PageSettingsModal = ({ isOpen, onClose, page }) => {
   const [isPrivate, setIsPrivate] = React.useState(page.private)
-  const { updatePageContent } = useUpdatePageContent()
+  const { updatePageSettings } = useUpdatePageSettings()
 
   const handleChange = () => {
     setIsPrivate(!isPrivate)
   }
 
   const handleSave = () => {
-    updatePageContent({
+    updatePageSettings({
       variables: { id: page._id, update: { private: isPrivate } },
     })
     onClose()
