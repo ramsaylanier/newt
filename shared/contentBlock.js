@@ -1,5 +1,6 @@
 import React from 'react'
 import { useRouter } from 'next/router'
+import { gql } from '@apollo/client'
 
 import { Box } from '@chakra-ui/react'
 import SuggestedPageLinks from './suggestedPageLinks'
@@ -11,31 +12,27 @@ import {
   convertFromRaw,
   getDefaultKeyBinding,
 } from 'draft-js'
-import { addPageLink, decorator, blockRendererFn } from '../utils/draftUtil'
 import ContentBlockControls from './contentBlockControls'
 
-import debounce from 'lodash/debounce'
-import isEqual from 'lodash/isEqual'
-import { useDrop } from 'react-dnd'
-import { getEntitiesFromText } from '../utils/adaptApi'
 import { useAuth } from '../utils/authClient'
+import { useDrop } from 'react-dnd'
+import usePusher from '../shared/hooks/usePusher'
 import useUpdatePageContent from './hooks/useUpdatePageContent'
+import debounce from 'lodash/debounce'
+import { getEntitiesFromText } from '../utils/adaptApi'
+import { addPageLink, decorator, blockRendererFn } from '../utils/draftUtil'
 
 const enableAdaptApi = process.env.NEXT_LOCAL_ENABLE_ADAPT_API
 
-export default function ContentBlock({
-  page,
-  editorState,
-  setEditorState,
-  isLocked,
-}) {
-  const contentRef = React.useRef(null)
+export default function ContentBlock({ page, isLocked }) {
   const router = useRouter()
   const { user } = useAuth()
   const { _key } = router.query
+  const [editorState, setEditorState] = React.useState(null)
   const { updatePageContent } = useUpdatePageContent()
   const [suggestedPageLinks, setSuggestedPageLinks] = React.useState([])
   const editorRef = React.useRef(null)
+  const previousContent = React.useRef(null)
   const isOwner = user && page ? user.sub === page.owner.id : false
 
   const [{ dropResult }, drop] = useDrop({
@@ -74,25 +71,53 @@ export default function ContentBlock({
   }, [])
 
   React.useEffect(() => {
+    if (previousContent.current) {
+      delayedSave(editorState)
+    }
     if (editorState) {
-      delayedSave(editorState, contentRef.current)
-      contentRef.current = convertToRaw(editorState.getCurrentContent())
+      previousContent.current = editorState.getCurrentContent()
     }
   }, [editorState])
 
-  const delayedSave = React.useRef(
-    debounce(async (editorState, previousContent) => {
-      let updatedContentState = editorState.getCurrentContent()
-      const content = convertToRaw(updatedContentState)
-
-      if (!isEqual(content, previousContent)) {
-        updatePageContent({
-          variables: { id: _key, content },
+  usePusher([
+    [
+      'contentAddedFromLinker',
+      ({ client, data }) => {
+        client.writeFragment({
+          id: data._id,
+          fragment: gql`
+            fragment updatedPage on Page {
+              _id
+              content
+            }
+          `,
+          data: {
+            id: data._id,
+            content: data.content,
+          },
         })
 
-        if (enableAdaptApi) {
-          getPageLinkSuggestions(updatedContentState)
+        if (data._key === _key) {
+          const content = convertFromRaw(data.content)
+          const updatedEditorState = EditorState.push(editorState, content)
+          setEditorState(updatedEditorState)
         }
+      },
+      [_key],
+    ],
+  ])
+
+  const delayedSave = React.useRef(
+    debounce(async (editorState) => {
+      let updatedContentState = editorState.getCurrentContent()
+      let rawContent = convertToRaw(updatedContentState)
+
+      updatePageContent({
+        variables: { id: _key, content: rawContent },
+      })
+
+      if (enableAdaptApi) {
+        getPageLinkSuggestions(updatedContentState)
       }
     }, 1000)
   ).current
@@ -142,6 +167,8 @@ export default function ContentBlock({
       handleChange(updatedEditorState)
     }
   }
+
+  if (!editorState) return null
 
   if (isOwner) {
     return (

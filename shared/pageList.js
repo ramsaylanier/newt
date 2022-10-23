@@ -35,48 +35,62 @@ const PageList = () => {
   const [value, setValue] = React.useState('')
   const { user } = useAuth()
 
-  usePusher('pageAdded', ({ client, data }) => {
-    let { currentUser } = client.readQuery({ query, variables })
-    client.writeQuery({
-      query,
-      variables,
-      data: {
-        currentUser: { ...currentUser, pages: [data, ...currentUser.pages] },
-      },
-    })
-  })
-
-  usePusher('pageDeleted', () => {
-    refetch()
-  })
-
-  usePusher('pageEdgeAdded', ({ client, data }) => {
-    const toKey = data?.to?._key || null
-    if (toKey) {
-      const filter = `page._id == 'Pages/${toKey}'`
-      try {
-        const { page } = client.readQuery({
-          query: PageQuery,
+  usePusher([
+    [
+      'pageAdded',
+      ({ client, data }) => {
+        console.log('added')
+        let { currentUser } = client.readQuery({ query, variables })
+        client.writeQuery({
+          query,
           variables,
-        })
-
-        if (page) {
-          client.writeQuery({
-            query: PageQuery,
-            variables: { ...variables, filter },
-            data: {
-              page: {
-                ...page,
-                edges: [data, ...page.edges],
-              },
+          data: {
+            currentUser: {
+              ...currentUser,
+              pages: [data, ...currentUser.pages],
             },
-          })
+          },
+        })
+      },
+    ],
+    [
+      'pageDeleted',
+      () => {
+        console.log('deleted')
+        refetch()
+      },
+    ],
+    [
+      'pageEdgeAdded',
+      ({ client, data }) => {
+        const toKey = data?.to?._key || null
+        if (toKey) {
+          const filter = `page._id == 'Pages/${toKey}'`
+          try {
+            const { page } = client.readQuery({
+              query: PageQuery,
+              variables,
+            })
+
+            if (page) {
+              client.writeQuery({
+                query: PageQuery,
+                variables: { ...variables, filter },
+                data: {
+                  page: {
+                    ...page,
+                    edges: [data, ...page.edges],
+                  },
+                },
+              })
+            }
+          } catch (e) {
+            console.log(e)
+          }
         }
-      } catch (e) {
-        console.log(e)
-      }
-    }
-  })
+      },
+    ],
+  ])
 
   const { filters, setFilters } = useSearchFilters()
 

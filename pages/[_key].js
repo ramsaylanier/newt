@@ -21,9 +21,6 @@ import PageTitle from '../shared/pageTitle'
 import PageLink from '../shared/pageLink'
 import PageSettingsModal from '../shared/pageSettingsModal'
 import ContentBlock from '../shared/contentBlock'
-import usePusher from '../shared/hooks/usePusher'
-import { EditorState, convertFromRaw } from 'draft-js'
-import { decorator } from '../utils/draftUtil'
 import { useAuth } from '../utils/authClient'
 
 export const query = gql`
@@ -61,35 +58,6 @@ const Page = () => {
   const { _key } = router.query
   const filter = `page._id == 'Pages/${_key}'`
   const { user } = useAuth()
-  const [editorState, setEditorState] = React.useState(
-    EditorState.createEmpty(decorator)
-  )
-
-  usePusher(
-    'contentAddedFromLinker',
-    ({ client, data }) => {
-      client.writeFragment({
-        id: data._id,
-        fragment: gql`
-          fragment updatedPage on Page {
-            _id
-            content
-          }
-        `,
-        data: {
-          id: data._id,
-          content: data.content,
-        },
-      })
-
-      if (data._key === _key) {
-        const content = convertFromRaw(data.content)
-        const updatedEditorState = EditorState.push(editorState, content)
-        setEditorState(updatedEditorState)
-      }
-    },
-    [_key]
-  )
 
   const { data, loading, error } = useQuery(query, {
     variables: { filter },
@@ -162,13 +130,7 @@ const Page = () => {
                 </RouterLink>
               )}
               <Text fontSize="sm">Last edited: {lastEdited}</Text>
-              <ContentBlock
-                editorState={editorState}
-                setEditorState={setEditorState}
-                page={page}
-                key={page._id}
-                isLocked={isLocked}
-              />
+              <ContentBlock page={page} key={page._id} isLocked={isLocked} />
             </Box>
 
             <Divider color="gray.400" />
