@@ -15,7 +15,7 @@ class App extends NextApp {
     const { Component } = this.props
     return (
       <Auth0Provider>
-        <ChakraProvider theme={theme}>
+        <ChakraProvider theme={theme} resetCSS={false}>
           <DndProvider backend={Backend}>
             <Component />
           </DndProvider>
