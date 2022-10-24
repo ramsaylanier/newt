@@ -19,6 +19,7 @@ import { useDrop } from 'react-dnd'
 import usePusher from '../shared/hooks/usePusher'
 import useUpdatePageContent from './hooks/useUpdatePageContent'
 import debounce from 'lodash/debounce'
+import isEqual from 'lodash/isEqual'
 import { getEntitiesFromText } from '../utils/adaptApi'
 import { addPageLink, decorator, blockRendererFn } from '../utils/draftUtil'
 
@@ -47,6 +48,13 @@ export default function ContentBlock({ page, isLocked }) {
     }),
   })
 
+  const rawContent = React.useMemo(() => {
+    if (editorState) {
+      return convertToRaw(editorState.getCurrentContent())
+    }
+    return null
+  }, [editorState?.getCurrentContent()])
+
   React.useEffect(() => {
     if (dropResult) {
       const { page } = dropResult
@@ -72,12 +80,14 @@ export default function ContentBlock({ page, isLocked }) {
 
   React.useEffect(() => {
     if (previousContent.current) {
-      delayedSave(editorState)
+      if (!isEqual(previousContent.current !== rawContent)) {
+        delayedSave(editorState)
+      }
     }
     if (editorState) {
-      previousContent.current = editorState.getCurrentContent()
+      previousContent.current = rawContent
     }
-  }, [editorState])
+  }, [rawContent])
 
   usePusher([
     [

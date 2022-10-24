@@ -75,8 +75,8 @@ const updatePageContent = async (args, db, pusher) => {
 
     Object.keys(entityMap).forEach(async (key) => {
       const entity = entityMap[key]
-      const pageKey = entity.data.pageKey
       if (entity.type === 'PAGELINK') {
+        const pageKey = entity.data.pageKey
         const block = blocks.find((b) => {
           const keys = b.entityRanges.map((r) => r.key)
           return keys.includes(Number(key))
@@ -100,12 +100,17 @@ const updatePageContent = async (args, db, pusher) => {
       return links
     }, [])
 
+    console.log({ linksFromContent })
+
     // update edges
     const { edges } = await edgeCollection.outEdges(`Pages/${args.id}`)
-
+    console.log({ edges })
     edges.forEach((edge) => {
-      const contentLink = linksFromContent.find((l) => l.pageKey === edge._key)
+      const contentLink = linksFromContent.find(
+        (l) => `Pages/${l.pageKey}` === edge._to
+      )
       if (contentLink) {
+        console.log({ contentLink })
         edgeCollection.update(edge._key, {
           blockKey: contentLink.blockKeys,
         })
@@ -116,6 +121,8 @@ const updatePageContent = async (args, db, pusher) => {
         edgeCollection.remove(edge._id)
       }
     })
+
+    console.log({ linksFromContent })
 
     // using forEach from lodash because I'm lazy
     // and didn't want to setup multiple Promise.all() for other subscriptions

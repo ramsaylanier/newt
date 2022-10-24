@@ -19,7 +19,7 @@ import { SearchIcon } from '@chakra-ui/icons'
 import CreatePageAction from './createPageAction'
 import { query } from './pageList'
 
-export default function PageFinder({ isOpen, onClose, onSave }) {
+export default function CreatePageLinkAction({ isOpen, onClose, onSave }) {
   const router = useRouter()
   const { _key } = router.query
   const skip = !isOpen

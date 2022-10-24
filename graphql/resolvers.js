@@ -104,7 +104,10 @@ const resolvers = {
       const collection = db.edgeCollection('PageEdges')
       try {
         const edges = []
-        const existingEdges = await collection.outEdges(`Pages/${source}`)
+        const { edges: existingEdges } = await collection.outEdges(
+          `Pages/${source}`
+        )
+
         const existingEdge = existingEdges.find((edge) => {
           return edge._to.includes(target)
         })
