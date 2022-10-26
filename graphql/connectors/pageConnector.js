@@ -104,7 +104,6 @@ const updatePageContent = async (args, db, pusher) => {
 
     // update edges
     const { edges } = await edgeCollection.outEdges(`Pages/${args.id}`)
-    console.log({ edges })
     edges.forEach((edge) => {
       const contentLink = linksFromContent.find(
         (l) => `Pages/${l.pageKey}` === edge._to

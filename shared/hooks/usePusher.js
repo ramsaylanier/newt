@@ -2,9 +2,15 @@ import React from 'react'
 import Pusher from 'pusher-js'
 import { useApolloClient } from '@apollo/client'
 
+let socketId = null
+
 const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
 const pusher = new Pusher(pusherKey, {
   cluster: 'us2',
+})
+
+pusher.connection.bind('connected', () => {
+  socketId = pusher.connection.socket_id
 })
 
 const usePusher = (subscriptions) => {
@@ -20,7 +26,8 @@ const usePusher = (subscriptions) => {
         function (data) {
           callback({ client, data: data.message })
         },
-        [actionName, ...deps]
+        [actionName, ...deps],
+        socketId
       )
     })
 

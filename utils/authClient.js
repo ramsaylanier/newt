@@ -21,7 +21,6 @@ export const Auth0Provider = ({ children }) => {
       }
     }
     initAuth0()
-    // eslint-disable-next-line
   }, [])
 
   return (

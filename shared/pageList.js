@@ -1,5 +1,5 @@
 import React from 'react'
-import { useQuery, gql } from '@apollo/client'
+
 import { useAuth } from '../utils/authClient'
 import {
   Input,
@@ -13,44 +13,44 @@ import PageListItem from './pageListItem'
 import useSearchFilters from './hooks/useSearchFilters'
 import usePusher from './hooks/usePusher'
 import { query as PageQuery } from '../pages/[_key]'
-
-export const query = gql`
-  query CurrentUserPages($filters: [FilterInput], $offset: Int, $count: Int) {
-    currentUser {
-      id
-      pages(filters: $filters, offset: $offset, count: $count) {
-        _id
-        _key
-        title
-        private
-        owner {
-          id
-        }
-      }
-    }
-  }
-`
+import useGetCurrentUser, { query } from './hooks/useGetCurrentUser'
 
 const PageList = () => {
   const [value, setValue] = React.useState('')
   const { user } = useAuth()
+  const { filters, setFilters } = useSearchFilters()
+  const variables = { filters }
+  const { data, error, loading, refetch } = useGetCurrentUser({
+    variables,
+    skip: !user,
+  })
+
+  React.useEffect(() => {
+    const filters = value
+      ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
+      : []
+
+    setFilters(filters)
+  }, [value])
 
   usePusher([
     [
       'pageAdded',
       ({ client, data }) => {
         console.log('added')
-        let { currentUser } = client.readQuery({ query, variables })
-        client.writeQuery({
-          query,
-          variables,
-          data: {
-            currentUser: {
-              ...currentUser,
-              pages: [data, ...currentUser.pages],
+        if (!data.private && data.owner?.id !== user.sub) {
+          let { currentUser } = client.readQuery({ query, variables })
+          client.writeQuery({
+            query,
+            variables,
+            data: {
+              currentUser: {
+                ...currentUser,
+                pages: [data, ...currentUser.pages],
+              },
             },
-          },
-        })
+          })
+        }
       },
     ],
     [
@@ -91,23 +91,6 @@ const PageList = () => {
       },
     ],
   ])
-
-  const { filters, setFilters } = useSearchFilters()
-
-  React.useEffect(() => {
-    const filters = value
-      ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
-      : []
-
-    setFilters(filters)
-  }, [value])
-
-  const variables = { filters }
-
-  const { data, error, loading, refetch } = useQuery(query, {
-    variables,
-    skip: !user,
-  })
 
   if (error) throw error
   if (loading) return <Spinner />

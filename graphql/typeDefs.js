@@ -52,7 +52,7 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    createPage(title: String!): Page
+    createPage(title: String!, private: Boolean): Page
     deletePage(id: String!): Page
     updatePageTitle(id: String!, title: String!): Page
     updatePageContent(id: String, content: GenericScalar): Page

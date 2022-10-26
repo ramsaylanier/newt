@@ -12,6 +12,7 @@ import {
   convertFromRaw,
   Modifier,
   ContentBlock,
+  ContentState,
   SelectionState,
   convertToRaw,
   genKey,
@@ -61,7 +62,7 @@ export const PageMutationResolvers = {
         title: args.title,
         lastEdited: new Date(),
         ownerId: user.sub,
-        private: false,
+        private: args.private || true,
       })
       return await collection.document(newPage)
     } catch (e) {
@@ -107,6 +108,9 @@ export const PageMutationResolvers = {
     try {
       const { selection, pageId, source } = args
       const page = await getPage(`page._id == '${args.pageId}'`, db, user)
+
+      console.log({ page, source, selection })
+
       const newBlock = new ContentBlock({
         key: genKey(),
         type: 'fromExtension',
@@ -116,8 +120,17 @@ export const PageMutationResolvers = {
         },
         characterList: List(),
       })
-      page.content.blocks.push(newBlock)
+
+      if (page.content) {
+        page.content.blocks.push(newBlock)
+      } else {
+        page.content = { blocks: [newBlock], entityMap: {} }
+      }
+
       const contentState = convertFromRaw(page.content)
+
+      console.log({ contentState })
+
       const selectionState = SelectionState.createEmpty(newBlock.key)
       const updatedContentState = Modifier.insertText(
         contentState,
@@ -125,6 +138,8 @@ export const PageMutationResolvers = {
         selection
       )
       const content = convertToRaw(updatedContentState)
+
+      console.log({ content })
 
       const update = await updatePageContent(
         { content, id: pageId },
@@ -134,6 +149,8 @@ export const PageMutationResolvers = {
       pusher.trigger('subscription', 'contentAddedFromLinker', {
         message: { ...update, __typename: 'Page' },
       })
+
+      return update
     } catch (e) {
       console.log(e)
     }
