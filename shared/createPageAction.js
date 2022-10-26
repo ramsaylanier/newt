@@ -1,11 +1,13 @@
 import React from 'react'
-import { useMutation } from '@apollo/client'
-import { createPageMutation } from '../graphql/mutations'
+import useCreatePage from './hooks/useCreatePage'
 
 import {
   useDisclosure,
   Input,
   Button,
+  Flex,
+  FormControl,
+  FormLabel,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -13,19 +15,20 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  Switch,
 } from '@chakra-ui/react'
 import { SmallAddIcon } from '@chakra-ui/icons'
 
 const CreatePageAction = ({ buttonColor }) => {
+  const [isPrivate, setIsPrivate] = React.useState(true)
   const [title, setTitle] = React.useState('')
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [createPage] = useMutation(createPageMutation)
+  const { createPage } = useCreatePage()
 
   const handleCreate = (e) => {
     e.preventDefault()
     createPage({
-      variables: { title },
-      refetchQueries: ['AllPages'],
+      variables: { title, private: isPrivate },
     })
     onClose()
     setTitle('')
@@ -34,6 +37,11 @@ const CreatePageAction = ({ buttonColor }) => {
   const handleChange = (e) => {
     setTitle(e.target.value)
   }
+
+  const handleSetPrivate = (e) => {
+    setIsPrivate(e.target.checked)
+  }
+
   return (
     <React.Fragment>
       <Button
@@ -53,12 +61,26 @@ const CreatePageAction = ({ buttonColor }) => {
           <ModalCloseButton />
           <ModalBody mt="2" mb="4">
             <form onSubmit={handleCreate}>
-              <Input
-                value={title}
-                onChange={handleChange}
-                placeholder="Page Title"
-                bg="gray.100"
-              />
+              <FormControl>
+                <Input
+                  value={title}
+                  onChange={handleChange}
+                  placeholder="Page Title"
+                  bg="gray.100"
+                />
+              </FormControl>
+
+              <FormControl mt="5">
+                <Flex>
+                  <FormLabel htmlFor="page-privacy">Private?</FormLabel>
+                  <Switch
+                    id="page-privacy"
+                    color="green"
+                    onChange={handleSetPrivate}
+                    isChecked={isPrivate}
+                  />
+                </Flex>
+              </FormControl>
             </form>
           </ModalBody>
 

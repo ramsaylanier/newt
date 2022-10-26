@@ -1,6 +1,5 @@
 import React from 'react'
 import { useRouter } from 'next/router'
-import { useQuery } from '@apollo/client'
 import {
   Input,
   InputGroup,
@@ -17,7 +16,7 @@ import {
 } from '@chakra-ui/react'
 import { SearchIcon } from '@chakra-ui/icons'
 import CreatePageAction from './createPageAction'
-import { query } from './pageList'
+import useGetCurrentUser from './hooks/useGetCurrentUser'
 
 export default function CreatePageLinkAction({ isOpen, onClose, onSave }) {
   const router = useRouter()
@@ -27,7 +26,8 @@ export default function CreatePageLinkAction({ isOpen, onClose, onSave }) {
   const filters = value
     ? [{ filter: `LIKE(page.title, "%${value}%", true)` }]
     : []
-  const { data } = useQuery(query, { variables: { filters }, skip })
+
+  const { data } = useGetCurrentUser({ variables: { filters }, skip })
 
   const pages =
     data?.currentUser?.pages?.filter((page) => page._key !== _key) || []

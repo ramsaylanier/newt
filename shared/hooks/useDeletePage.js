@@ -1,4 +1,5 @@
 import { useMutation, gql } from '@apollo/client'
+import { useAuth } from '../../utils/authClient'
 
 const deleteMutation = gql`
   mutation DeletePage($id: String!) {
@@ -10,21 +11,27 @@ const deleteMutation = gql`
 `
 
 export default function useDeletePage() {
-  const [deletePage, data] = useMutation(deleteMutation)
+  const [mutation, { data }] = useMutation(deleteMutation)
+  const { user } = useAuth()
 
-  const mutation = ({ page }) => {
-    return deletePage({
-      variables: { id: page._id },
+  const deletePage = (mutationProps) => {
+    return mutation({
+      ...mutationProps,
       refetchQueries: ['CurrentUserPages', 'Graph'],
-      optimisticResponse: {
-        deletePage: {
-          _id: page._id,
-          __typename: 'Page',
-          ownerId: page.owner?.id || page.ownerId,
-        },
+      update: (cache) => {
+        cache.modify({
+          id: cache.identify({ __typename: 'User', id: user.sub }),
+          fields: {
+            pages: (cachedPages) => {
+              return cachedPages.filter(
+                (p) => p._id !== mutationProps.variables.id
+              )
+            },
+          },
+        })
       },
     })
   }
 
-  return { mutation, data }
+  return { deletePage, data }
 }

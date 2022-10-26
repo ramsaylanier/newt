@@ -1,10 +1,10 @@
 import React from 'react'
 import { Button } from '@chakra-ui/react'
-import { useQuery, useMutation } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import { query as PageQuery } from '../pages/[_key]'
 import { EditorState, SelectionState, Modifier, convertToRaw } from 'draft-js'
-import { createPageMutation } from '../graphql/mutations'
 import useUpdatePageContent from './hooks/useUpdatePageContent'
+import useCreatePage from './hooks/useCreatePage'
 import { useRouter } from 'next/router'
 
 export default function SuggestedPageLink(props) {
@@ -12,7 +12,7 @@ export default function SuggestedPageLink(props) {
   const { _key } = router.query
   const { entity, blockKey, editorState, setEditorState } = props
   let { start_pos, end_pos } = entity
-  const [createPage] = useMutation(createPageMutation)
+  const { createPage } = useCreatePage()
   const { updatePageContent } = useUpdatePageContent()
   const { data, loading } = useQuery(PageQuery, {
     variables: { filter: `page.title == '${entity.text}'` },

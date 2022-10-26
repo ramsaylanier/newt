@@ -27,9 +27,9 @@ export default function PageListItem({ page }) {
     item: { page, type: 'Page' },
     collect: (monitor) => ({ isDragging: monitor.isDragging() }),
   })
-  const { mutation: deletePage } = useDeletePage()
+  const { deletePage } = useDeletePage()
   const handleDelete = () => {
-    deletePage({ page })
+    deletePage({ variables: { id: page._id } })
     onClose()
   }
 
